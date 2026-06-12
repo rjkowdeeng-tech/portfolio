@@ -5,9 +5,17 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // ─── CUSTOM CURSOR ────────────────────────────────────────────
+  // Inner dot tracks the pointer 1:1; the triangle ring lags behind and
+  // rotates: it aims its apex along the direction of travel, swings to point
+  // at nearby clickable elements, and squeezes on click.
   const cursor = document.getElementById('cursor');
   const cursorRing = document.getElementById('cursor-ring');
-  let mx = 0, my = 0, rx = 0, ry = 0;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let mx = 0, my = 0, rx = 0, ry = 0;       // pointer + lagged ring position
+  let lastMx = 0, lastMy = 0, vx = 0, vy = 0; // smoothed pointer velocity
+  let angle = 0;                             // ring rotation, deg (0 = apex up)
+  let pressScale = 1, pressTarget = 1;       // click squeeze
 
   document.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
@@ -17,13 +25,80 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  document.addEventListener('mousedown', () => { pressTarget = 0.72; });
+  document.addEventListener('mouseup',   () => { pressTarget = 1; });
+
+  // Cache the rects of clickable targets; refresh only when layout may shift.
+  const CURSOR_TARGETS = 'a, button, [role="button"], input, textarea, label, .focus-card';
+  let rects = [], rectsDirty = true;
+  const markRectsDirty = () => { rectsDirty = true; };
+  const refreshRects = () => {
+    rects = Array.from(document.querySelectorAll(CURSOR_TARGETS)).map(el => {
+      const r = el.getBoundingClientRect();
+      return { cx: r.left + r.width / 2, cy: r.top + r.height / 2,
+               l: r.left, t: r.top, r: r.right, b: r.bottom };
+    });
+    rectsDirty = false;
+  };
+  window.addEventListener('scroll', markRectsDirty, { passive: true });
+  window.addEventListener('resize', markRectsDirty);
+  setTimeout(markRectsDirty, 600); // catch late-rendered content
+
+  const ATTRACT_RADIUS = 130; // px: distance at which the apex locks onto a target
+
   const animCursor = () => {
+    // lagged follow
     rx += (mx - rx) * 0.12;
     ry += (my - ry) * 0.12;
+
+    // smoothed velocity (direction of travel)
+    vx += ((mx - lastMx) - vx) * 0.3;
+    vy += ((my - lastMy) - vy) * 0.3;
+    lastMx = mx; lastMy = my;
+
     if (cursorRing) {
-      cursorRing.style.left = rx + 'px';
-      cursorRing.style.top = ry + 'px';
+      if (reduceMotion) {
+        cursorRing.style.left = rx + 'px';
+        cursorRing.style.top = ry + 'px';
+      } else {
+        if (rectsDirty) refreshRects();
+
+        // nearest clickable within range (distance to its closest edge)
+        let near = null, nearDist = ATTRACT_RADIUS;
+        for (const r of rects) {
+          const nx = Math.max(r.l, Math.min(rx, r.r));
+          const ny = Math.max(r.t, Math.min(ry, r.b));
+          const d = Math.hypot(rx - nx, ry - ny);
+          if (d < nearDist) { nearDist = d; near = r; }
+        }
+
+        // decide apex direction: lock onto a target, else follow movement
+        let targetAngle = angle;
+        if (near) {
+          const dx = near.cx - rx, dy = near.cy - ry;
+          if (Math.hypot(dx, dy) > 6) targetAngle = Math.atan2(dx, -dy) * 180 / Math.PI;
+        } else if (Math.hypot(vx, vy) > 0.6) {
+          targetAngle = Math.atan2(vx, -vy) * 180 / Math.PI;
+        }
+
+        // ease along the shortest rotational path
+        const delta = ((targetAngle - angle + 540) % 360) - 180;
+        angle += delta * 0.18;
+
+        pressScale += (pressTarget - pressScale) * 0.25;
+
+        cursorRing.style.left = rx + 'px';
+        cursorRing.style.top = ry + 'px';
+        cursorRing.style.transform =
+          `translate(-50%, -50%) rotate(${angle}deg) scale(${pressScale})`;
+      }
     }
+
+    // dot shares the click squeeze
+    if (cursor && !reduceMotion) {
+      cursor.style.transform = `translate(-50%, -50%) scale(${pressScale})`;
+    }
+
     requestAnimationFrame(animCursor);
   };
   animCursor();
