@@ -627,63 +627,186 @@ input, textarea { cursor: text; }
   text-transform: uppercase;
 }
 
-/* --- EXPERTISE --- */
+/* --- FOCUS AREAS (orbital cards) --- */
 #expertise { padding: 0; }
-.expertise-header {
-  padding: 80px;
-  border-bottom: 1px solid var(--border);
+
+.focus-section {
+  padding: 160px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
+.focus-head { max-width: 600px; margin-bottom: 64px; }
+.focus-head .section-label { justify-content: center; margin-bottom: 28px; }
 .expertise-title {
   font-family: var(--serif);
   font-size: clamp(36px, 4.5vw, 64px);
   line-height: 1.05;
-  max-width: 500px;
+  max-width: 520px;
+  margin: 0 auto;
 }
-.expertise-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.focus-intro {
+  margin: 22px auto 0;
+  max-width: 440px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--fg-dim);
 }
-.expertise-item {
-  padding: 60px 80px;
-  border-bottom: 1px solid var(--border);
-  border-right: 1px solid var(--border);
+
+/* ---- invisible orbital stage ---- */
+.focus-orbit {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  height: 600px;
+  margin: 0 auto;
+}
+.focus-orbit::before {
+  content: '';
+  position: absolute;
+  inset: 14%;
+  background: radial-gradient(circle at 50% 50%, rgba(240,237,230,0.06), transparent 68%);
+  filter: blur(46px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* anchor each card on the circle (N / E / S / W) */
+.focus-slot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 236px;
+  transform: translate(-50%, -50%) translate(var(--ox, 0px), var(--oy, 0px));
+  z-index: 1;
+}
+.focus-slot--n { --ox: 0px;    --oy: -184px; }
+.focus-slot--e { --ox: 190px;  --oy: 0px;    }
+.focus-slot--s { --ox: 0px;    --oy: 184px;  }
+.focus-slot--w { --ox: -190px; --oy: 0px;    }
+
+/* ---- the floating glass card ---- */
+.focus-card {
+  position: relative;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  transition: background 0.3s ease;
-  position: relative;
-  overflow: hidden;
+  gap: 12px;
+  padding: 26px 26px 28px;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: linear-gradient(158deg, rgba(240,237,230,0.07), rgba(240,237,230,0.015));
+  backdrop-filter: blur(14px) saturate(125%);
+  -webkit-backdrop-filter: blur(14px) saturate(125%);
+  box-shadow: 0 20px 50px -22px rgba(0,0,0,0.75), inset 0 1px 0 rgba(240,237,230,0.06);
+  cursor: none;
+  scale: var(--s, 1);
+  translate: 0 0;
+  will-change: transform, translate;
+  transition: scale 0.4s var(--ease-out-expo),
+              border-color 0.4s ease,
+              box-shadow 0.4s ease,
+              background 0.4s ease,
+              filter 0.4s ease;
+  animation: focus-orbit var(--dur, 22s) linear infinite;
 }
-.expertise-item:nth-child(even) { border-right: none; }
-.expertise-item:nth-last-child(-n+2) { border-bottom: none; }
-.expertise-item:hover { background: rgba(240,237,230,0.02); }
-.expertise-num {
+/* subtle per-card depth + desynced timing */
+.focus-slot--n .focus-card { --s: 1.00; --dur: 23s; animation-delay:  0s;  }
+.focus-slot--e .focus-card { --s: 0.97; --dur: 27s; animation-delay: -6s;  }
+.focus-slot--s .focus-card { --s: 1.02; --dur: 20s; animation-delay: -12s; }
+.focus-slot--w .focus-card { --s: 0.98; --dur: 25s; animation-delay: -3s;  }
+
+.focus-card-num {
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.15em;
   color: var(--fg-muted);
 }
-.expertise-name {
-  font-family: var(--serif);
-  font-size: clamp(24px, 3vw, 40px);
-  line-height: 1.1;
+.focus-card-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(20px, 2.4vw, 28px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
 }
-.expertise-desc {
-  font-size: 13px;
+.focus-card-desc {
+  font-size: 12.5px;
+  line-height: 1.7;
   color: var(--fg-dim);
-  line-height: 1.8;
-  max-width: 340px;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  translate: 0 -4px;
+  transition: max-height 0.45s var(--ease-out-expo),
+              opacity 0.35s ease,
+              margin-top 0.45s var(--ease-out-expo),
+              translate 0.45s var(--ease-out-expo);
 }
-.expertise-arrow {
-  font-size: 20px;
-  color: var(--fg-muted);
-  margin-top: auto;
-  transition: transform 0.25s ease, color 0.25s ease;
-  display: inline-block;
+
+/* hover / keyboard focus — lift, brighten, glow, pause orbit */
+.focus-card:hover,
+.focus-card:focus-visible {
+  scale: 1.07;
+  border-color: var(--border-hover);
+  background: linear-gradient(158deg, rgba(240,237,230,0.12), rgba(240,237,230,0.03));
+  box-shadow: 0 28px 70px -24px rgba(0,0,0,0.85),
+              0 0 0 1px rgba(240,237,230,0.14),
+              0 0 44px -8px rgba(240,237,230,0.20),
+              inset 0 1px 0 rgba(240,237,230,0.10);
+  filter: brightness(1.08) contrast(1.04);
+  outline: none;
+  z-index: 5;
+  animation-play-state: paused;
 }
-.expertise-item:hover .expertise-arrow { transform: translateX(8px); color: var(--fg); }
-.expertise-name { transition: transform 0.35s var(--ease-out-expo); }
-.expertise-item:hover .expertise-name { transform: translateX(6px); }
+
+/* clicked / open — expand slightly + reveal description */
+.focus-card.is-open {
+  scale: 1.05;
+  border-color: var(--border-hover);
+  background: linear-gradient(158deg, rgba(240,237,230,0.13), rgba(240,237,230,0.04));
+  box-shadow: 0 30px 80px -26px rgba(0,0,0,0.90),
+              0 0 0 1px rgba(240,237,230,0.16),
+              0 0 50px -8px rgba(240,237,230,0.22),
+              inset 0 1px 0 rgba(240,237,230,0.12);
+  z-index: 6;
+  animation-play-state: paused;
+}
+.focus-card.is-open .focus-card-desc {
+  max-height: 180px;
+  opacity: 1;
+  margin-top: 4px;
+  translate: 0 0;
+}
+
+/* click ripple / pulse */
+.focus-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(240,237,230,0.45);
+  opacity: 0;
+  pointer-events: none;
+}
+.focus-card.is-pulsing::after { animation: focus-pulse 0.6s var(--ease-out-expo); }
+
+@keyframes focus-orbit {
+  0%    { translate: 10px 0;    }
+  12.5% { translate: 7px 7px;   }
+  25%   { translate: 0 10px;    }
+  37.5% { translate: -7px 7px;  }
+  50%   { translate: -10px 0;   }
+  62.5% { translate: -7px -7px; }
+  75%   { translate: 0 -10px;   }
+  87.5% { translate: 7px -7px;  }
+  100%  { translate: 10px 0;    }
+}
+@keyframes focus-pulse {
+  0%   { opacity: 0.5; scale: 1;    }
+  100% { opacity: 0;   scale: 1.14; }
+}
 
 /* --- PROJECTS --- */
 #projects { padding: 0; }
@@ -870,12 +993,6 @@ input, textarea { cursor: text; }
 /* --- CONTACT --- */
 #contact { padding: 0; }
 
-.contact-hero {
-  padding: 100px 80px 80px;
-  border-bottom: 1px solid var(--border);
-  position: relative;
-  overflow: hidden;
-}
 .contact-available {
   font-family: var(--mono);
   font-size: 9px;
@@ -896,10 +1013,10 @@ input, textarea { cursor: text; }
 }
 .contact-headline {
   font-family: var(--serif);
-  font-size: clamp(64px, 9vw, 130px);
-  line-height: 0.88;
+  font-size: clamp(48px, 6vw, 96px);
+  line-height: 0.9;
   letter-spacing: -0.03em;
-  margin-bottom: 48px;
+  margin-bottom: 40px;
 }
 .contact-sub {
   font-size: 14px;
@@ -955,24 +1072,12 @@ input, textarea { cursor: text; }
   border-bottom: 1px solid var(--border);
 }
 
-.contact-time-side {
+.contact-statement-side {
   padding: 80px;
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-}
-.contact-clock {
-  font-family: var(--mono);
-  font-size: clamp(32px, 4vw, 56px);
-  letter-spacing: 0.05em;
-  margin-bottom: 8px;
-}
-.contact-tz {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--fg-muted);
-  letter-spacing: 0.15em;
+  justify-content: flex-start;
 }
 
 .contact-send-title {
@@ -985,6 +1090,7 @@ input, textarea { cursor: text; }
 .contact-send-title em { font-style: italic; color: var(--fg-dim); }
 
 .contact-form-side { padding: 80px; }
+.contact-form-spacer { visibility: hidden; }
 .contact-form-title {
   font-family: var(--serif);
   font-size: clamp(32px, 3.5vw, 50px);
@@ -1244,15 +1350,19 @@ footer {
   .section { padding: 80px 40px; }
   .about-top { padding: 60px 40px; }
   .about-person { padding: 60px 40px; }
-  .expertise-header { padding: 60px 40px; }
-  .expertise-item { padding: 40px; }
+  .focus-section { padding: 120px 40px; }
+  .focus-orbit { max-width: 560px; height: 540px; }
+  .focus-slot { width: 208px; }
+  .focus-slot--n { --oy: -168px; }
+  .focus-slot--s { --oy: 168px; }
+  .focus-slot--e { --ox: 168px; }
+  .focus-slot--w { --ox: -168px; }
   .projects-header-left { padding: 60px 40px; }
   .projects-header-right { padding: 60px 40px; }
   .project-item-inner { padding: 40px; grid-template-columns: 60px 1fr; }
   .project-img-side { display: none; }
   .projects-footer { padding: 40px; }
-  .contact-hero { padding: 60px 40px; }
-  .contact-time-side { padding: 60px 40px; }
+  .contact-statement-side { padding: 60px 40px; }
   .contact-form-side { padding: 60px 40px; }
   .contact-closing { padding: 40px; }
   footer { padding: 60px 40px; }
@@ -1264,13 +1374,25 @@ footer {
   .about-person { grid-template-columns: 1fr; gap: 32px; }
   .about-portrait { max-width: 220px; }
   .about-stats { grid-template-columns: 1fr 1fr; }
-  .expertise-grid { grid-template-columns: 1fr; }
-  .expertise-item { border-right: none !important; }
-  .expertise-item:last-child { border-bottom: 1px solid var(--border); }
+  .focus-section { padding: 90px 40px; }
+  .focus-orbit {
+    height: auto;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .focus-orbit::before { display: none; }
+  .focus-slot { position: static; width: 100%; transform: none; }
+  .focus-card { animation: none; scale: 1; translate: 0; }
+  .focus-card:hover,
+  .focus-card:focus-visible,
+  .focus-card.is-open { scale: 1.02; }
   .projects-header { grid-template-columns: 1fr; }
   .projects-header-left { border-right: none; border-bottom: 1px solid var(--border); }
   .contact-body { grid-template-columns: 1fr; }
-  .contact-time-side { border-right: none; border-bottom: 1px solid var(--border); }
+  .contact-statement-side { border-right: none; border-bottom: 1px solid var(--border); }
+  .contact-form-spacer { display: none; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-headline { font-size: clamp(28px, 10vw, 60px); }
   .footer-bottom { flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -1284,14 +1406,13 @@ footer {
   .about-person { padding: 48px 24px; }
   .about-person { grid-template-columns: 1fr; gap: 28px; }
   .about-portrait { max-width: 200px; }
-  .expertise-header { padding: 48px 24px; }
-  .expertise-item { padding: 32px 24px; }
+  .focus-section { padding: 72px 24px; }
+  .focus-orbit { max-width: 100%; }
   .projects-header-left, .projects-header-right { padding: 48px 24px; }
   .project-item-inner { padding: 32px 24px; grid-template-columns: 1fr; }
   .project-num { display: none; }
   .projects-footer { padding: 32px 24px; }
-  .contact-hero { padding: 48px 24px; }
-  .contact-time-side, .contact-form-side { padding: 48px 24px; }
+  .contact-statement-side, .contact-form-side { padding: 48px 24px; }
   footer { padding: 48px 24px; }
   .about-stats { grid-template-columns: 1fr 1fr; }
 }
@@ -1299,7 +1420,7 @@ footer {
 /* --- HEADER FONT (Outfit SemiBold) --- */
 .hero-name, .hero-bg-text,
 .about-headline, .about-person-title,
-.expertise-title, .expertise-name,
+.expertise-title, .focus-card-title,
 .about-stat-num, .stat-num,
 .project-title, .projects-header-title,
 .contact-headline, .contact-send-title, .contact-form-title,
@@ -1312,7 +1433,7 @@ footer {
 
 /* --- TYPOGRAPHY REFINEMENTS --- */
 .expertise-title, .about-person-title, .contact-form-title { text-wrap: balance; }
-.hero-desc, .about-person p, .expertise-desc, .project-desc, .contact-sub { text-wrap: pretty; }
+.hero-desc, .about-person p, .focus-card-desc, .project-desc, .contact-sub { text-wrap: pretty; }
 
 /* --- REDUCED MOTION --- */
 @media (prefers-reduced-motion: reduce) {
@@ -1323,6 +1444,8 @@ footer {
   }
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; filter: none; }
+  .focus-card { animation: none !important; translate: 0 0 !important; }
+  .focus-orbit::before { display: none; }
   #neural-bg { display: none; }
 }
 
@@ -1543,35 +1666,47 @@ footer {
        EXPERTISE
   ═══════════════════════════════════════ -->
   <div id="expertise">
-    <div class="expertise-header">
-      <p class="section-label">Focus Areas</p>
-      <h2 class="expertise-title reveal">Sharpening the craft.</h2>
-    </div>
+    <div class="focus-section">
+      <div class="focus-head reveal">
+        <p class="section-label">Focus Areas</p>
+        <h2 class="expertise-title">Sharpening the craft.</h2>
+        <p class="focus-intro">Four core capabilities, orbiting the same goal — turning ideas into things that actually ship. Tap a card to learn more.</p>
+      </div>
 
-    <div class="expertise-grid">
-      <div class="expertise-item reveal">
-        <div class="expertise-num">01</div>
-        <h3 class="expertise-name">Websites</h3>
-        <p class="expertise-desc">Responsive, intentional sites built with HTML, CSS, and JavaScript — AI-assisted from first prompt to final polish.</p>
-        <span class="expertise-arrow">→</span>
-      </div>
-      <div class="expertise-item reveal reveal-delay-1">
-        <div class="expertise-num">02</div>
-        <h3 class="expertise-name">Automation</h3>
-        <p class="expertise-desc">Removing repetitive work by connecting the tools people already use. Small workflow wins that compound.</p>
-        <span class="expertise-arrow">→</span>
-      </div>
-      <div class="expertise-item reveal reveal-delay-2">
-        <div class="expertise-num">03</div>
-        <h3 class="expertise-name">AI Workflows</h3>
-        <p class="expertise-desc">Vibe coding, prompt engineering, and AI pair-programming as a daily practice — not a novelty.</p>
-        <span class="expertise-arrow">→</span>
-      </div>
-      <div class="expertise-item reveal reveal-delay-3">
-        <div class="expertise-num">04</div>
-        <h3 class="expertise-name">Learning</h3>
-        <p class="expertise-desc">Build, break, document, repeat. Tutorials start the journey — shipped projects finish it.</p>
-        <span class="expertise-arrow">→</span>
+      <div class="focus-orbit reveal">
+
+        <div class="focus-slot focus-slot--n">
+          <button class="focus-card" type="button" aria-expanded="false">
+            <span class="focus-card-num">01</span>
+            <span class="focus-card-title">AI Building</span>
+            <span class="focus-card-desc">Designing and shipping with AI in the loop — from first prompt to deployed product. Real tools, not throwaway demos.</span>
+          </button>
+        </div>
+
+        <div class="focus-slot focus-slot--e">
+          <button class="focus-card" type="button" aria-expanded="false">
+            <span class="focus-card-num">02</span>
+            <span class="focus-card-title">Vibe Coding</span>
+            <span class="focus-card-desc">Coding in flow with AI as a pair — fast iteration and tight feedback loops, grounded in real fundamentals.</span>
+          </button>
+        </div>
+
+        <div class="focus-slot focus-slot--s">
+          <button class="focus-card" type="button" aria-expanded="false">
+            <span class="focus-card-num">03</span>
+            <span class="focus-card-title">Automation</span>
+            <span class="focus-card-desc">Removing repetitive work by wiring the tools people already use into quiet, reliable workflows that compound.</span>
+          </button>
+        </div>
+
+        <div class="focus-slot focus-slot--w">
+          <button class="focus-card" type="button" aria-expanded="false">
+            <span class="focus-card-num">04</span>
+            <span class="focus-card-title">Digital Operations</span>
+            <span class="focus-card-desc">Keeping the digital side of a business running — systems, content, and processes organized so the day just works.</span>
+          </button>
+        </div>
+
       </div>
     </div>
   </div><!-- /expertise -->
@@ -1720,58 +1855,52 @@ footer {
   ═══════════════════════════════════════ -->
   <div id="contact">
 
-    <!-- Hero -->
-    <div class="contact-hero">
-      <p class="section-label">Get in Touch</p>
-      <div class="contact-available">Open to opportunities</div>
-      <h2 class="contact-headline reveal">
-        Let's<br />Build<br />Something<br />Real.
-      </h2>
-      <p class="contact-sub reveal">
-        I'm open to junior roles, freelance projects, collaborations, and learning
-        opportunities. If you're building something interesting — or just have advice
-        worth hearing — my inbox is open.
-      </p>
-      <p class="contact-sub reveal" style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;color:var(--fg-muted);margin-bottom:24px;">
-        Prefer reaching out directly? Choose your channel.
-      </p>
-
-      <div class="contact-channels reveal reveal-delay-1">
-        <a href="mailto:rjkowdeeng@gmail.com" class="contact-channel">
-          <span class="channel-num">01</span>
-          <span class="channel-label">Email</span>
-          <span class="channel-value">rjkowdeeng@gmail.com ↗</span>
-        </a>
-        <a href="https://twitter.com/rjkowdeeng" target="_blank" class="contact-channel">
-          <span class="channel-num">02</span>
-          <span class="channel-label">Twitter</span>
-          <span class="channel-value">@rjkowdeeng ↗</span>
-        </a>
-        <a href="https://www.linkedin.com/in/rjohn2026" target="_blank" class="contact-channel">
-          <span class="channel-num">03</span>
-          <span class="channel-label">LinkedIn</span>
-          <span class="channel-value">linkedin.com/in/rjohn2026 ↗</span>
-        </a>
-        <a href="https://github.com/rjkowdeeng-tech/portfolio" target="_blank" class="contact-channel">
-          <span class="channel-num">04</span>
-          <span class="channel-label">GitHub</span>
-          <span class="channel-value">github.com/rjkowdeeng-tech ↗</span>
-        </a>
-      </div>
-    </div>
-
     <!-- Body -->
     <div class="contact-body">
-      <!-- Left: clock + title -->
-      <div class="contact-time-side">
-        <div>
-          <div class="contact-clock" id="clock">00:00:00</div>
-          <div class="contact-tz">UTC+8 · Philippines</div>
+      <!-- Left: intro + statement -->
+      <div class="contact-statement-side">
+        <p class="section-label">Get in Touch</p>
+        <h2 class="contact-headline reveal">
+          Let's<br />Build<br />Something<br />Real.
+        </h2>
+        <div class="contact-available">Open to opportunities</div>
+        <p class="contact-sub reveal">
+          I'm open to junior roles, freelance projects, collaborations, and learning
+          opportunities. If you're building something interesting — or just have advice
+          worth hearing — my inbox is open.
+        </p>
+        <p class="contact-sub reveal" style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;color:var(--fg-muted);margin-bottom:24px;">
+          Prefer reaching out directly? Choose your channel.
+        </p>
+
+        <div class="contact-channels reveal reveal-delay-1">
+          <a href="mailto:rjkowdeeng@gmail.com" class="contact-channel">
+            <span class="channel-num">01</span>
+            <span class="channel-label">Email</span>
+            <span class="channel-value">rjkowdeeng@gmail.com ↗</span>
+          </a>
+          <a href="https://twitter.com/rjkowdeeng" target="_blank" class="contact-channel">
+            <span class="channel-num">02</span>
+            <span class="channel-label">Twitter</span>
+            <span class="channel-value">@rjkowdeeng ↗</span>
+          </a>
+          <a href="https://www.linkedin.com/in/rjohn2026" target="_blank" class="contact-channel">
+            <span class="channel-num">03</span>
+            <span class="channel-label">LinkedIn</span>
+            <span class="channel-value">linkedin.com/in/rjohn2026 ↗</span>
+          </a>
+          <a href="https://github.com/rjkowdeeng-tech/portfolio" target="_blank" class="contact-channel">
+            <span class="channel-num">04</span>
+            <span class="channel-label">GitHub</span>
+            <span class="channel-value">github.com/rjkowdeeng-tech ↗</span>
+          </a>
         </div>
       </div>
 
       <!-- Right: form -->
       <div class="contact-form-side">
+        <!-- invisible spacer: aligns "Your" with "Let's" across the divider -->
+        <p class="section-label contact-form-spacer" aria-hidden="true">Get in Touch</p>
         <div class="contact-form-title reveal">
           Your<br /><em>Message.</em>
         </div>
@@ -1891,19 +2020,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ─── CLOCK ──────────────────────────────────────────────────
-  const clockEl = document.getElementById('clock');
-  const updateClock = () => {
-    const now = new Date();
-    const ph = new Date(now.getTime() + (8 * 60 * 60 * 1000));
-    const h = ph.getUTCHours().toString().padStart(2, '0');
-    const m = ph.getUTCMinutes().toString().padStart(2, '0');
-    const s = ph.getUTCSeconds().toString().padStart(2, '0');
-    if (clockEl) clockEl.textContent = `${h}:${m}:${s}`;
-  };
-  setInterval(updateClock, 1000);
-  updateClock();
-
   // Footer local time
   const footerTimeEl = document.getElementById('footer-time');
   const updateFooterTime = () => {
@@ -1927,6 +2043,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
   revealEls.forEach(el => observer.observe(el));
+
+  // ─── FOCUS CARDS (click to expand, one open at a time) ──────
+  const focusCards = document.querySelectorAll('.focus-card');
+  focusCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const willOpen = !card.classList.contains('is-open');
+      // collapse any previously opened card
+      focusCards.forEach(c => {
+        c.classList.remove('is-open');
+        c.setAttribute('aria-expanded', 'false');
+      });
+      if (willOpen) {
+        card.classList.add('is-open');
+        card.setAttribute('aria-expanded', 'true');
+      }
+      // replay the ripple/pulse
+      card.classList.remove('is-pulsing');
+      void card.offsetWidth;            // force reflow so the animation restarts
+      card.classList.add('is-pulsing');
+    });
+    card.addEventListener('animationend', (e) => {
+      if (e.animationName === 'focus-pulse') card.classList.remove('is-pulsing');
+    });
+  });
 
   // ─── ACTIVE NAV LINK ─────────────────────────────────────────
   // Track only sections the nav actually links to, and fire when a section
