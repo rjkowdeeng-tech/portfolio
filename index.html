@@ -48,7 +48,8 @@ body {
   font-family: var(--sans);
   font-weight: 400;
   line-height: 1.6;
-  overflow-x: hidden;
+  overflow-x: clip;        /* clip (not hidden) so it doesn't become a scroll
+                              container — keeps position:sticky working */
   cursor: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -255,6 +256,9 @@ input, textarea { cursor: text; }
 #menu-btn.open span:nth-child(2) { opacity: 0; }
 #menu-btn.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
+/* hidden on desktop; the @media (max-width:1024px) block turns it into the overlay */
+.mobile-nav { display: none; }
+
 /* --- MAIN CONTENT --- */
 #main {
   margin-left: 220px;
@@ -271,7 +275,6 @@ input, textarea { cursor: text; }
   padding: 0 80px 60px;
   position: relative;
   overflow: hidden;
-  border-bottom: 1px solid var(--border);
 }
 
 .hero-greeting {
@@ -460,12 +463,80 @@ input, textarea { cursor: text; }
 /* --- ABOUT --- */
 #about { padding: 0; }
 
+/* Pixel-dissolve reveal (desktop only; JS adds .pixelate when the content fits
+   the screen). The section is pinned full-screen under a canvas of ~10px black
+   boxes that clear one by one — scrubbed to scroll — to unveil the content. */
+.about-pixels { display: none; }
+
+@media (min-width: 1025px) {
+  #about.pixelate { height: 100vh; }
+  #about.pixelate .about-stage {
+    position: relative;      /* positioning context for the canvas overlay */
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;     /* centre the content — surrounding space fills the screen */
+  }
+  #about.pixelate .about-body { width: 100%; }
+  #about.pixelate .about-pixels {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;             /* canvas is a replaced element — inset:0 won't stretch it */
+    height: 100%;
+    z-index: 6;
+    pointer-events: none;    /* once cleared, clicks pass through to the content */
+  }
+}
+
 .about-top {
   padding: 80px;
-  border-right: 1px solid var(--border);
+  position: relative;
 }
 /* flush the statement toward the center divider (ragged left edge) */
 .about-top .section-label { justify-content: flex-end; }
+
+/* vertical divider between The Journey and The Person — a hairline with a
+   warm highlight that travels down it, capped by a pulsing dot at each end */
+.about-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 1px;
+  background-image:
+    linear-gradient(180deg, transparent 0%, rgba(240,237,230,0.85) 50%, transparent 100%),
+    linear-gradient(var(--border), var(--border));
+  background-size: 100% 32%, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: 0 -45%, 0 0;
+  animation: about-divider-flow 4.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.about-divider::before,
+.about-divider::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--fg-dim);
+  transform: translateX(-50%);
+  box-shadow: 0 0 0 4px rgba(240,237,230,0.04), 0 0 12px rgba(240,237,230,0.25);
+  animation: about-dot-pulse 3s ease-in-out infinite;
+}
+.about-divider::before { top: -3px; }
+.about-divider::after  { bottom: -3px; animation-delay: 1.5s; }
+
+@keyframes about-divider-flow {
+  0%   { background-position: 0 -45%, 0 0; }
+  100% { background-position: 0 145%, 0 0; }
+}
+@keyframes about-dot-pulse {
+  0%, 100% { transform: translateX(-50%) scale(1);    background: var(--fg-dim); }
+  50%      { transform: translateX(-50%) scale(1.35); background: var(--fg); }
+}
 
 .about-headline {
   font-family: var(--serif);
@@ -533,7 +604,6 @@ input, textarea { cursor: text; }
 .about-body {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
-  border-bottom: 1px solid var(--border);
 }
 
 .about-person {
@@ -597,36 +667,6 @@ input, textarea { cursor: text; }
 }
 .about-cta:hover { border-color: var(--fg); }
 
-.about-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid var(--border);
-}
-.about-stat {
-  padding: 40px;
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  text-align: center;
-  gap: 8px;
-}
-.about-stat:last-child { border-right: none; }
-.about-stat-num {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(32px, 4vw, 56px);
-  line-height: 1;
-}
-.about-stat-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  color: var(--fg-muted);
-  text-transform: uppercase;
-}
-
 /* --- FOCUS AREAS (orbital cards) --- */
 #expertise { padding: 0; }
 
@@ -639,13 +679,6 @@ input, textarea { cursor: text; }
 }
 .focus-head { max-width: 600px; margin-bottom: 64px; }
 .focus-head .section-label { justify-content: center; margin-bottom: 28px; }
-.expertise-title {
-  font-family: var(--serif);
-  font-size: clamp(36px, 4.5vw, 64px);
-  line-height: 1.05;
-  max-width: 520px;
-  margin: 0 auto;
-}
 .focus-intro {
   margin: 22px auto 0;
   max-width: 440px;
@@ -809,16 +842,14 @@ input, textarea { cursor: text; }
 }
 
 /* --- PROJECTS --- */
-#projects { padding: 0; }
+#projects { padding: 0; max-width: 1150px; margin-inline: auto; }
 
 .projects-header {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  border-bottom: 1px solid var(--border);
+  grid-template-columns: 1fr;
 }
 .projects-header-left {
   padding: 80px;
-  border-right: 1px solid var(--border);
 }
 .projects-count {
   font-family: var(--mono);
@@ -826,12 +857,6 @@ input, textarea { cursor: text; }
   letter-spacing: 0.2em;
   color: var(--fg-muted);
   margin-bottom: 12px;
-}
-.projects-header-title {
-  font-family: var(--serif);
-  font-size: clamp(64px, 9vw, 128px);
-  line-height: 0.9;
-  letter-spacing: -0.03em;
 }
 .projects-header-right {
   padding: 80px;
@@ -852,7 +877,6 @@ input, textarea { cursor: text; }
 
 .project-list { }
 .project-item {
-  border-bottom: 1px solid var(--border);
   transition: background 0.3s ease;
 }
 .project-item:hover { background: rgba(240,237,230,0.015); }
@@ -966,32 +990,252 @@ input, textarea { cursor: text; }
   writing-mode: vertical-rl;
 }
 
-.projects-footer {
-  padding: 60px 80px;
+/* --- PROJECTS · sticky paper-stack (only active when JS adds .stack) --- */
+/* Each card pins near the top of the viewport; as the next card rises it lays
+   over the previous one, which recedes — scales in, dims, and blurs — so the
+   list reads like sheets of paper stacking. Driven by --s (0 = front sheet,
+   1 = fully receded). Per-card `top` is set inline by JS so each receded sheet
+   peeks above the next. Desktop/tablet only; ≤768px falls back to normal flow. */
+@media (min-width: 769px) {
+  /* extra room after the last sheet so the finished stack holds briefly
+     before the whole pile releases and scrolls away */
+  .project-list.stack { padding-bottom: 12vh; }
+  .project-list.stack .project-item {
+    position: sticky;
+    /* a touch lighter than the near-black page (#080808) so each sheet reads
+       as a distinct surface — still dim and warm, on-palette */
+    background: #1c1b19;
+    box-shadow: 0 -22px 60px -16px rgba(0,0,0,0.8);
+    transform-origin: 50% 0%;
+    transform: scale(calc(1 - var(--s, 0) * 0.12));
+    filter: brightness(calc(1 - var(--s, 0) * 0.5)) blur(calc(var(--s, 0) * 3px));
+    will-change: transform, filter;
+  }
+  /* hover lifts the sheet a shade brighter (still opaque so it never goes see-through) */
+  .project-list.stack .project-item:hover { background: #242320; }
+}
+
+/* --- PROCESS · vertical timeline --- */
+#process { padding: 0; max-width: 1150px; margin-inline: auto; }
+
+.process-header {
+  padding: 80px;
+}
+.process-header .section-label { margin-bottom: 16px; }
+.process-intro {
+  margin-top: 28px;
+  max-width: 460px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--fg-dim);
+}
+
+.timeline {
+  --tl-pad: 72px;
+  --tl-rail: 40px;
+  position: relative;
+  padding: 48px var(--tl-pad) 72px;
+}
+
+/* spine track — faint guide down the centre */
+.timeline-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom,
+    transparent, var(--border) 4%, var(--border) 96%, transparent);
+  z-index: 0;
+}
+/* spine progress — bright line that draws downward with scroll (--tp: 0 → 1) */
+.timeline-progress {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: calc(var(--tp, 0) * 100%);
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, rgba(240,237,230,0) 0%, var(--fg-dim) 8%, var(--fg) 100%);
+  box-shadow: 0 0 14px rgba(240,237,230,0.45);
+  border-radius: 2px;
+  opacity: clamp(0, calc(var(--tp, 0) * 40), 1);
+  z-index: 0;
+}
+.timeline-progress::after {            /* glowing draw point at the tip */
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--fg);
+  transform: translateX(-50%);
+  box-shadow: 0 0 16px 2px rgba(240,237,230,0.7);
+}
+
+.timeline-step {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr var(--tl-rail) 1fr;
+  column-gap: 44px;
+  align-items: center;
+  padding: 30px 0;
+}
+/* alternate sides — odd (01,03,05,07) left, even (02,04,06) right */
+.timeline-step:nth-of-type(odd)  { --slide: -56px; }
+.timeline-step:nth-of-type(even) { --slide: 56px; }
+.timeline-step:nth-of-type(odd)  .step-body { grid-column: 1; text-align: right; }
+.timeline-step:nth-of-type(even) .step-body { grid-column: 3; text-align: left; }
+.timeline-step:nth-of-type(odd)  .step-head { justify-content: flex-end; }
+.timeline-step:nth-of-type(even) .step-head { justify-content: flex-start; }
+.timeline-step:nth-of-type(odd)  .step-desc { margin-left: auto; }
+.timeline-step:nth-of-type(even) .step-desc { margin-right: auto; }
+
+/* dot on the spine — pops + brightens as its step reveals */
+.step-rail { grid-column: 2; display: flex; justify-content: center; }
+.step-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid var(--fg-muted);
+  background: var(--bg);
+  transform: scale(0.35);
+  opacity: 0;
+  transition: transform 0.9s var(--ease-out-expo),
+              opacity 0.9s var(--ease-out-expo),
+              border-color 0.9s var(--ease-out-expo),
+              background 0.9s var(--ease-out-expo),
+              box-shadow 0.9s var(--ease-out-expo);
+}
+.timeline-step.visible .step-dot {
+  transform: scale(1);
+  opacity: 1;
+  border-color: var(--fg);
+  background: var(--fg);
+  box-shadow: 0 0 0 5px rgba(240,237,230,0.06), 0 0 16px rgba(240,237,230,0.45);
+}
+.timeline-step:hover .step-dot {
+  box-shadow: 0 0 0 6px rgba(240,237,230,0.1), 0 0 20px rgba(240,237,230,0.6);
+}
+
+/* water-drop ripple — rings emanate from the bottom of the spine once the fill lands */
+.timeline-ripple {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.timeline-ripple::before,
+.timeline-ripple::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(240, 237, 230, 0.85);
+  opacity: 0;
+  transform: scale(0.3);
+}
+.timeline.rippling .timeline-ripple::before { animation: timeline-ripple 2.2s ease-out infinite; }
+.timeline.rippling .timeline-ripple::after  { animation: timeline-ripple 2.2s ease-out infinite 1.1s; }
+@keyframes timeline-ripple {
+  0%   { transform: scale(0.3); opacity: 0; }
+  12%  { opacity: 0.55; }
+  100% { transform: scale(7);   opacity: 0; }
+}
+
+/* content slides in from its own side as the step scrolls into view (slow + clearly visible) */
+.step-body {
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateX(var(--slide, 0));
+  transition: opacity 1.15s var(--ease-out-expo),
+              transform 1.15s var(--ease-out-expo),
+              filter 1.15s var(--ease-out-expo);
+}
+.timeline-step.visible .step-body {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateX(0);
+}
+
+.step-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid var(--border);
+  margin-bottom: 14px;
 }
-.projects-footer p {
+.step-num {
   font-family: var(--mono);
   font-size: 11px;
+  letter-spacing: 0.15em;
   color: var(--fg-muted);
-  letter-spacing: 0.08em;
+  transition: color 0.3s ease;
 }
-.projects-footer a {
+.timeline-step.visible .step-num { color: var(--fg-dim); }
+.step-phase {
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--fg);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 2px;
-  transition: border-color 0.2s ease;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  position: relative;
+  margin-left: 16px;
+  padding-left: 16px;
 }
-.projects-footer a:hover { border-color: var(--fg); }
+.step-phase::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 8px;
+  height: 1px;
+  background: var(--fg-muted);
+}
+.step-title {
+  font-size: clamp(24px, 2.8vw, 38px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+.step-desc {
+  font-size: 13px;
+  color: var(--fg-dim);
+  line-height: 1.8;
+  max-width: 360px;
+}
+
+/* mobile: collapse the zig-zag into a single left-aligned rail */
+@media (max-width: 720px) {
+  .timeline { --tl-rail: 14px; --tl-pad: 0px; padding: 32px 8px 48px 6px; }
+  .timeline-line, .timeline-progress { left: 7px; }
+  .timeline-step {
+    grid-template-columns: var(--tl-rail) 1fr;
+    column-gap: 22px;
+    align-items: start;
+  }
+  .timeline-step:nth-of-type(odd),
+  .timeline-step:nth-of-type(even) { --slide: 28px; }
+  .step-rail { grid-column: 1; padding-top: 5px; }
+  .timeline-step:nth-of-type(odd)  .step-body,
+  .timeline-step:nth-of-type(even) .step-body { grid-column: 2; text-align: left; }
+  .timeline-step:nth-of-type(odd)  .step-head,
+  .timeline-step:nth-of-type(even) .step-head { justify-content: flex-start; }
+  .timeline-step:nth-of-type(odd)  .step-desc,
+  .timeline-step:nth-of-type(even) .step-desc { margin: 0; max-width: none; }
+}
 
 /* --- CONTACT --- */
-#contact { padding: 0; }
+#contact { padding: 0; max-width: 1150px; margin-inline: auto; }
 
 .contact-available {
   font-family: var(--mono);
@@ -1010,13 +1254,6 @@ input, textarea { cursor: text; }
   border-radius: 50%;
   background: #4ade80;
   animation: pulse-dot 2s infinite;
-}
-.contact-headline {
-  font-family: var(--serif);
-  font-size: clamp(48px, 6vw, 96px);
-  line-height: 0.9;
-  letter-spacing: -0.03em;
-  margin-bottom: 40px;
 }
 .contact-sub {
   font-size: 14px;
@@ -1074,7 +1311,6 @@ input, textarea { cursor: text; }
 
 .contact-statement-side {
   padding: 80px;
-  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -1310,10 +1546,7 @@ footer {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
   .about-body { grid-template-columns: 1fr; }
-  .about-top { border-right: none; border-bottom: 1px solid var(--border); }
-  .about-stats { grid-template-columns: 1fr 1fr; }
-  .about-stat:nth-child(2) { border-right: none; }
-  .about-stat:nth-child(3) { border-top: 1px solid var(--border); }
+  .about-divider { display: none; }   /* columns stack — no center divider */
 }
 
 @media (max-width: 1024px) {
@@ -1361,7 +1594,8 @@ footer {
   .projects-header-right { padding: 60px 40px; }
   .project-item-inner { padding: 40px; grid-template-columns: 60px 1fr; }
   .project-img-side { display: none; }
-  .projects-footer { padding: 40px; }
+  .process-header { padding: 60px 40px; }
+  .timeline { --tl-pad: 40px; }
   .contact-statement-side { padding: 60px 40px; }
   .contact-form-side { padding: 60px 40px; }
   .contact-closing { padding: 40px; }
@@ -1373,7 +1607,6 @@ footer {
   .about-body { grid-template-columns: 1fr; }
   .about-person { grid-template-columns: 1fr; gap: 32px; }
   .about-portrait { max-width: 220px; }
-  .about-stats { grid-template-columns: 1fr 1fr; }
   .focus-section { padding: 90px 40px; }
   .focus-orbit {
     height: auto;
@@ -1388,8 +1621,6 @@ footer {
   .focus-card:hover,
   .focus-card:focus-visible,
   .focus-card.is-open { scale: 1.02; }
-  .projects-header { grid-template-columns: 1fr; }
-  .projects-header-left { border-right: none; border-bottom: 1px solid var(--border); }
   .contact-body { grid-template-columns: 1fr; }
   .contact-statement-side { border-right: none; border-bottom: 1px solid var(--border); }
   .contact-form-spacer { display: none; }
@@ -1411,19 +1642,18 @@ footer {
   .projects-header-left, .projects-header-right { padding: 48px 24px; }
   .project-item-inner { padding: 32px 24px; grid-template-columns: 1fr; }
   .project-num { display: none; }
-  .projects-footer { padding: 32px 24px; }
+  .process-header { padding: 48px 24px; }
+  .timeline { --tl-pad: 24px; --tl-rail: 36px; padding-top: 16px; }
+  .timeline-step { gap: 20px; padding: 26px 0; }
   .contact-statement-side, .contact-form-side { padding: 48px 24px; }
   footer { padding: 48px 24px; }
-  .about-stats { grid-template-columns: 1fr 1fr; }
 }
 
 /* --- HEADER FONT (Outfit SemiBold) --- */
 .hero-name, .hero-bg-text,
 .about-headline, .about-person-title,
-.expertise-title, .focus-card-title,
-.about-stat-num, .stat-num,
-.project-title, .projects-header-title,
-.contact-headline, .contact-send-title, .contact-form-title,
+.focus-card-title, .project-title, .step-title,
+.contact-send-title, .contact-form-title,
 .contact-closing-words, .footer-headline,
 .preloader-name, .mobile-nav a {
   font-family: var(--display);
@@ -1432,7 +1662,7 @@ footer {
 }
 
 /* --- TYPOGRAPHY REFINEMENTS --- */
-.expertise-title, .about-person-title, .contact-form-title { text-wrap: balance; }
+.about-person-title, .contact-form-title { text-wrap: balance; }
 .hero-desc, .about-person p, .focus-card-desc, .project-desc, .contact-sub { text-wrap: pretty; }
 
 /* --- REDUCED MOTION --- */
@@ -1453,6 +1683,9 @@ footer {
 <noscript>
   <style>
     .reveal { opacity: 1; transform: none; filter: none; }
+    /* timeline steps animate their children via JS — show them when JS is off */
+    .timeline-step .step-body { opacity: 1; transform: none; filter: none; }
+    .timeline-step .step-dot { opacity: 1; transform: none; }
     #preloader, #cursor, #cursor-ring { display: none; }
   </style>
 </noscript>
@@ -1490,6 +1723,7 @@ footer {
   <a href="#hero">Home</a>
   <a href="#about">About</a>
   <a href="#projects">Projects</a>
+  <a href="#process">Process</a>
   <a href="#contact">Contact</a>
 </nav>
 
@@ -1503,7 +1737,8 @@ footer {
     <a href="#hero" class="active"><span class="num">01</span>Home</a>
     <a href="#about"><span class="num">02</span>About</a>
     <a href="#projects"><span class="num">03</span>Projects</a>
-    <a href="#contact"><span class="num">04</span>Contact</a>
+    <a href="#process"><span class="num">04</span>Process</a>
+    <a href="#contact"><span class="num">05</span>Contact</a>
   </div>
 
   <!-- Meta bottom -->
@@ -1596,6 +1831,7 @@ footer {
        02 ABOUT
   ═══════════════════════════════════════ -->
   <div id="about">
+    <div class="about-stage">
 
     <!-- The Journey + The Person — combined into one section, two columns -->
     <div class="about-body">
@@ -1610,6 +1846,7 @@ footer {
           Fast<em>with</em><br />
           <span class="ai">AI</span>
         </h2>
+        <span class="about-divider" aria-hidden="true"></span>
       </div>
 
       <!-- Right: the person -->
@@ -1637,28 +1874,10 @@ footer {
         <a href="#contact" class="about-cta reveal reveal-delay-2">Let's talk →</a>
         </div>
       </div>
-    </div>
+    </div><!-- /about-body -->
 
-    <!-- Stats row -->
-    <div class="about-stats">
-      <div class="about-stat">
-        <div class="about-stat-num">Now</div>
-        <div class="about-stat-label">Building this portfolio</div>
-      </div>
-      <div class="about-stat">
-        <div class="about-stat-num">Next</div>
-        <div class="about-stat-label">Automation projects</div>
-      </div>
-      <div class="about-stat">
-        <div class="about-stat-num">Open</div>
-        <div class="about-stat-label">Junior roles &amp; freelance</div>
-      </div>
-      <div class="about-stat">
-        <div class="about-stat-num">Always</div>
-        <div class="about-stat-label">Learning by doing</div>
-      </div>
-    </div>
-
+    <canvas class="about-pixels" aria-hidden="true"></canvas>
+    </div><!-- /about-stage -->
   </div><!-- /about -->
 
 
@@ -1669,7 +1888,6 @@ footer {
     <div class="focus-section">
       <div class="focus-head reveal">
         <p class="section-label">Focus Areas</p>
-        <h2 class="expertise-title">Sharpening the craft.</h2>
         <p class="focus-intro">Four core capabilities, orbiting the same goal — turning ideas into things that actually ship. Tap a card to learn more.</p>
       </div>
 
@@ -1720,16 +1938,7 @@ footer {
     <!-- Header -->
     <div class="projects-header">
       <div class="projects-header-left">
-        <p class="projects-count">Personal Builds &nbsp;·&nbsp; 2026 —</p>
-        <div class="projects-header-title reveal">
-          Work<br />in <em style="font-family:var(--serif);font-style:italic;color:var(--fg-dim)">Progress.</em>
-        </div>
-      </div>
-      <div class="projects-header-right">
-        <div class="projects-header-meta reveal">
-          <p>03 / Real Builds</p>
-          <p style="margin-top:8px;font-size:12px;">No invented case studies —<br/>every project here is real, and the learning shows.</p>
-        </div>
+        <p class="projects-count section-label">Personal Builds</p>
       </div>
     </div>
 
@@ -1842,16 +2051,141 @@ footer {
 
     </div><!-- /project-list -->
 
-    <div class="projects-footer">
-      <p>More builds on the way — this list grows with every project</p>
-      <a href="https://github.com/rjkowdeeng-tech/portfolio" target="_blank">GitHub ↗</a>
-    </div>
-
   </div><!-- /projects -->
 
 
   <!-- ═══════════════════════════════════════
-       04 CONTACT
+       04 PROCESS
+  ═══════════════════════════════════════ -->
+  <div id="process">
+
+    <!-- Header -->
+    <div class="process-header">
+      <p class="section-label">How I Build</p>
+      <p class="process-intro reveal reveal-delay-1">
+        A repeatable system that ships fast without sacrificing quality.
+        Every engagement follows this framework.
+      </p>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline">
+      <span class="timeline-line" aria-hidden="true"></span>
+      <span class="timeline-progress" aria-hidden="true"></span>
+      <span class="timeline-ripple" aria-hidden="true"></span>
+
+      <article class="timeline-step">
+        <div class="step-rail"><span class="step-dot"></span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-num">01</span>
+            <span class="step-phase">Discovery</span>
+          </div>
+          <h3 class="step-title">Deep Dive</h3>
+          <p class="step-desc">
+            We map the problem space, define success metrics, and align on
+            what done looks like. 1-hour call.
+          </p>
+        </div>
+      </article>
+
+      <article class="timeline-step">
+        <div class="step-rail"><span class="step-dot"></span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-num">02</span>
+            <span class="step-phase">Planning</span>
+          </div>
+          <h3 class="step-title">Blueprint</h3>
+          <p class="step-desc">
+            I produce a technical spec, architecture diagram, and
+            week-by-week delivery plan. Clear, no surprises.
+          </p>
+        </div>
+      </article>
+
+      <article class="timeline-step">
+        <div class="step-rail"><span class="step-dot"></span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-num">03</span>
+            <span class="step-phase">Prototype</span>
+          </div>
+          <h3 class="step-title">Rapid Prototype</h3>
+          <p class="step-desc">
+            You see a clickable prototype within 48 hours. Real screens,
+            real flow — before a line of code is committed.
+          </p>
+        </div>
+      </article>
+
+      <article class="timeline-step">
+        <div class="step-rail"><span class="step-dot"></span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-num">04</span>
+            <span class="step-phase">Development</span>
+          </div>
+          <h3 class="step-title">Ship Fast</h3>
+          <p class="step-desc">
+            Iterative development with daily updates. Code is clean, tested,
+            and deployed to staging continuously.
+          </p>
+        </div>
+      </article>
+
+      <article class="timeline-step">
+        <div class="step-rail"><span class="step-dot"></span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-num">05</span>
+            <span class="step-phase">Testing</span>
+          </div>
+          <h3 class="step-title">QA &amp; Polish</h3>
+          <p class="step-desc">
+            Device testing, performance checks, edge cases. Your product
+            works before it meets your users.
+          </p>
+        </div>
+      </article>
+
+      <article class="timeline-step">
+        <div class="step-rail"><span class="step-dot"></span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-num">06</span>
+            <span class="step-phase">Launch</span>
+          </div>
+          <h3 class="step-title">Go Live</h3>
+          <p class="step-desc">
+            Production deployment, domain setup, monitoring configured.
+            I stay on standby for 72 hours post-launch.
+          </p>
+        </div>
+      </article>
+
+      <article class="timeline-step">
+        <div class="step-rail"><span class="step-dot"></span></div>
+        <div class="step-body">
+          <div class="step-head">
+            <span class="step-num">07</span>
+            <span class="step-phase">Support</span>
+          </div>
+          <h3 class="step-title">Ongoing</h3>
+          <p class="step-desc">
+            Bug fixes, feature additions, and scaling support. You're never
+            left holding a broken product.
+          </p>
+        </div>
+      </article>
+
+    </div><!-- /timeline -->
+
+  </div><!-- /process -->
+
+
+  <!-- ═══════════════════════════════════════
+       05 CONTACT
   ═══════════════════════════════════════ -->
   <div id="contact">
 
@@ -1860,9 +2194,6 @@ footer {
       <!-- Left: intro + statement -->
       <div class="contact-statement-side">
         <p class="section-label">Get in Touch</p>
-        <h2 class="contact-headline reveal">
-          Let's<br />Build<br />Something<br />Real.
-        </h2>
         <div class="contact-available">Open to opportunities</div>
         <p class="contact-sub reveal">
           I'm open to junior roles, freelance projects, collaborations, and learning
@@ -1952,6 +2283,11 @@ footer {
    InDigital Portfolio
    main.js
 =========================== */
+
+/* always start at the very top on (re)load — don't restore the previous scroll */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
+window.addEventListener('load', () => window.scrollTo(0, 0));
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -2125,7 +2461,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // so it never fights the reveal system's `transform` transitions)
     const magEls = finePointer
       ? Array.from(document.querySelectorAll(
-          '.hero-name, .hero-title, .about-headline, .expertise-title, .projects-header-title, .contact-headline, .contact-closing-words'
+          '.hero-name, .hero-title, .about-headline, .contact-closing-words'
         )).map(el => { el.style.willChange = 'transform'; return { el, ox: 0, oy: 0 }; })
       : [];
 
@@ -2345,16 +2681,217 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ─── PROJECT ITEM HOVER IMAGE ────────────────────────────────
   const projectItems = document.querySelectorAll('.project-item');
-  projectItems.forEach(item => {
-    item.addEventListener('mouseenter', () => {
-      item.style.background = 'rgba(240,237,230,0.015)';
-    });
-    item.addEventListener('mouseleave', () => {
-      item.style.background = '';
-    });
-  });
+
+  // ─── PROJECTS · STICKY PAPER-STACK ───────────────────────────
+  // Each card pins near the top; as the next card rises it lays over the
+  // previous one, which recedes (scales in + dims + blurs) — sheets stacking.
+  // Each card's `--s` (0 → 1) tracks how far its *next* sibling has covered it.
+  // Desktop/tablet only (the CSS rules live in @media (min-width:769px)).
+  const projList = document.querySelector('.project-list');
+  const reduceMotionStack = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (projList && projectItems.length > 1 && !reduceMotionStack) {
+    const STACK_TOP = 86;   // px from viewport top where cards pin
+    const SLIVER = 16;      // each card pins a little lower, so edges peek through
+    const cards = Array.from(projectItems);
+    projList.classList.add('stack');
+    cards.forEach((card, i) => { card.style.top = (STACK_TOP + i * SLIVER) + 'px'; });
+
+    const clampS = v => (v < 0 ? 0 : v > 1 ? 1 : v);
+    const smooth = t => t * t * (3 - 2 * t);   // smoothstep — eases the recede
+    let stackTicking = false;
+    const updateStack = () => {
+      stackTicking = false;
+      const coverDist = window.innerHeight * 0.6;   // scroll distance over which a card recedes
+      cards.forEach((card, i) => {
+        const next = cards[i + 1];
+        let s = 0;
+        if (next) {
+          const pin = STACK_TOP + (i + 1) * SLIVER;             // where `next` comes to rest
+          const nextTop = next.getBoundingClientRect().top;
+          s = clampS(1 - (nextTop - pin) / coverDist);          // 0 until next nears, 1 once it covers
+        }
+        card.style.setProperty('--s', smooth(s).toFixed(4));
+      });
+    };
+    const onStackScroll = () => {
+      if (!stackTicking) { stackTicking = true; requestAnimationFrame(updateStack); }
+    };
+    window.addEventListener('scroll', onStackScroll, { passive: true });
+    window.addEventListener('resize', onStackScroll, { passive: true });
+    updateStack();
+  }
+
+  // ─── PROCESS · SEQUENTIAL STEP REVEAL ────────────────────────
+  // Strictly one at a time, in order: a step reveals only once its top passes
+  // the trigger line AND the step before it has already revealed. A minimum
+  // gap keeps fast scrolls from popping several at once.
+  const timelineSteps = Array.from(document.querySelectorAll('.timeline-step'));
+  if (timelineSteps.length) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      timelineSteps.forEach(s => s.classList.add('visible'));   // no motion — just show them
+    } else {
+      let nextIdx = 0;
+      let lastReveal = 0;
+      const MIN_GAP = 360;     // ms enforced between consecutive reveals
+      const TRIGGER = 0.82;    // a step reveals once its top passes this fraction of the viewport
+      let rafId = null;
+      const tick = (now) => {
+        rafId = null;
+        if (nextIdx >= timelineSteps.length) return;
+        const line = window.innerHeight * TRIGGER;
+        if (timelineSteps[nextIdx].getBoundingClientRect().top <= line) {
+          if (now - lastReveal >= MIN_GAP) {
+            timelineSteps[nextIdx].classList.add('visible');
+            nextIdx++;
+            lastReveal = now;
+          }
+          rafId = requestAnimationFrame(tick);   // keep cascading until caught up to scroll
+        }
+      };
+      const onStepScroll = () => { if (rafId === null) rafId = requestAnimationFrame(tick); };
+      window.addEventListener('scroll', onStepScroll, { passive: true });
+      window.addEventListener('resize', onStepScroll, { passive: true });
+      requestAnimationFrame(tick);
+    }
+  }
+
+  // ─── PROCESS · TIMELINE DRAW-ON-SCROLL ───────────────────────
+  // The bright spine fill grows as the timeline passes a point on screen,
+  // setting --tp (0 → 1).
+  const timelineEl = document.querySelector('.timeline');
+  if (timelineEl && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const clampT = v => (v < 0 ? 0 : v > 1 ? 1 : v);
+    let tlTicking = false;
+    const updateTimeline = () => {
+      tlTicking = false;
+      const rect = timelineEl.getBoundingClientRect();
+      const anchor = window.innerHeight * 0.7;          // the draw point on screen
+      const tp = clampT((anchor - rect.top) / rect.height);
+      timelineEl.style.setProperty('--tp', tp.toFixed(4));
+      // once the fill lands at the very bottom, ripple out from it like a drop in water
+      timelineEl.classList.toggle('rippling', tp >= 0.99 && rect.bottom > 0);
+    };
+    const onTl = () => {
+      if (!tlTicking) { tlTicking = true; requestAnimationFrame(updateTimeline); }
+    };
+    window.addEventListener('scroll', onTl, { passive: true });
+    window.addEventListener('resize', onTl, { passive: true });
+    updateTimeline();
+  }
+
+  // ─── ABOUT · PIXEL-DISSOLVE REVEAL ───────────────────────────
+  // The About section fills the screen under a canvas of background-coloured
+  // blocks; once it scrolls up to fill the screen the dissolve auto-plays once
+  // (time-based, never reversing) to unveil the content. Desktop only, and only
+  // when the content fits within one screen (else About renders normally).
+  const pxAbout = document.getElementById('about');
+  const pxCanvas = pxAbout && pxAbout.querySelector('.about-pixels');
+  const pxBody = pxAbout && pxAbout.querySelector('.about-body');
+  if (pxAbout && pxCanvas && pxBody && pxCanvas.getContext) {
+    const PX_CELL = 70;          // pixel-block size
+    const PX_STAGGER = 3;        // a column starts after this many blocks of the one to its right
+    const PX_INSET = 64;         // pull the grid in from the content edges (cover the text, not the screen)
+    const PX_TOP_ROWS = 2;       // extra block rows above the content
+    const PX_BOT_ROWS = 2;       // extra block rows below the content
+    // blocks are the exact page background, so the cover is invisible and content
+    // simply materialises block by block as the wave clears them (no grid lines)
+    const BG = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#080808';
+    const DISSOLVE_MS = 2000;    // one-time dissolve duration
+    const pxCtx = pxCanvas.getContext('2d');
+    let pxCells = [], pxMaxOrder = 0, pxActive = false, pxShineRaf = null;
+    let pxTriggered = false, pxStart = 0;                   // one-shot, time-based dissolve
+
+    const pxFits = () =>
+      window.innerWidth >= 1025 &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+      pxBody.offsetHeight <= window.innerHeight - 24;   // small margin so nothing clips
+
+    const pxBuild = () => {
+      const w = pxCanvas.clientWidth, h = pxCanvas.clientHeight;
+      if (!w || !h) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      pxCanvas.width = Math.round(w * dpr);
+      pxCanvas.height = Math.round(h * dpr);
+      pxCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // cover only the About content box, inset so the grid hugs the text (not the screen edges)
+      const cRect = pxCanvas.getBoundingClientRect();
+      const bRect = pxBody.getBoundingClientRect();
+      const x0 = Math.max(0, Math.round(bRect.left - cRect.left) + PX_INSET);
+      const x1 = Math.min(w, Math.round(bRect.right - cRect.left) - PX_INSET);
+      const yTop = Math.round(bRect.top - cRect.top) + PX_INSET;
+      const yBot = Math.min(h, Math.round(bRect.bottom - cRect.top) - PX_INSET);
+      const nCols = Math.max(1, Math.ceil((x1 - x0) / PX_CELL));
+      const baseRows = Math.max(1, Math.ceil((yBot - yTop) / PX_CELL));
+      const y0 = yTop - PX_TOP_ROWS * PX_CELL;             // extra rows above the content
+      const nRows = baseRows + PX_TOP_ROWS + PX_BOT_ROWS;  // + extra row(s) below
+      pxMaxOrder = (nCols - 1) * PX_STAGGER + (nRows - 1);
+      // dissolve order: bottom-right block first, up the right column; each column to the
+      // left starts PX_STAGGER blocks later — a diagonal wave sweeping up and to the left
+      pxCells = [];
+      for (let r = 0; r < nRows; r++) {
+        for (let c = 0; c < nCols; c++) {
+          pxCells.push({
+            x: x0 + c * PX_CELL,
+            y: y0 + r * PX_CELL,
+            order: (nCols - 1 - c) * PX_STAGGER + (nRows - 1 - r),
+            cleared: false,
+          });
+        }
+      }
+      pxCtx.clearRect(0, 0, w, h);   // the render loop paints the covered blocks
+    };
+
+    // one render loop: auto-start the dissolve when the section fills the screen, advance
+    // it by time (never reversing — stays revealed once dissolved), and paint the covered
+    // background-coloured blocks each frame.
+    const pxShine = (now) => {
+      pxShineRaf = pxActive ? requestAnimationFrame(pxShine) : null;
+      const vh = window.innerHeight;
+      const r = pxAbout.getBoundingClientRect();
+      // auto-start once the section has scrolled up to fill the screen
+      if (!pxTriggered && r.top <= vh * 0.02 && r.bottom >= vh * 0.5) {
+        pxTriggered = true; pxStart = now;
+      }
+      // time-based, one-way dissolve (cleared blocks never come back)
+      if (pxTriggered) {
+        const t = Math.min(1, (now - pxStart) / DISSOLVE_MS) * pxMaxOrder;
+        for (const c of pxCells) if (!c.cleared && c.order <= t) c.cleared = true;
+      }
+      if (r.bottom < -vh || r.top > 2 * vh) return;        // far from view — skip painting
+      const w = pxCanvas.clientWidth, h = pxCanvas.clientHeight;
+      pxCtx.clearRect(0, 0, w, h);
+      pxCtx.fillStyle = BG;
+      for (const c of pxCells) if (!c.cleared) pxCtx.fillRect(c.x, c.y, PX_CELL, PX_CELL);
+    };
+
+    const pxEvaluate = () => {
+      const shouldRun = pxFits();
+      if (shouldRun && !pxActive) {
+        pxAbout.classList.add('pixelate');
+        pxBuild();
+        pxActive = true;
+        if (!pxShineRaf) pxShineRaf = requestAnimationFrame(pxShine);
+      } else if (!shouldRun && pxActive) {
+        pxAbout.classList.remove('pixelate');
+        if (pxShineRaf) { cancelAnimationFrame(pxShineRaf); pxShineRaf = null; }
+        pxCtx.clearRect(0, 0, pxCanvas.width, pxCanvas.height);
+        pxActive = false;
+      } else if (shouldRun && pxActive) {
+        pxBuild();                                          // rebuild on resize (the loop re-applies dissolve state)
+      }
+    };
+
+    let pxResizeTimer = null;
+    const pxOnResize = () => {
+      if (pxResizeTimer) clearTimeout(pxResizeTimer);
+      pxResizeTimer = setTimeout(pxEvaluate, 200);        // rebuild only after resize settles
+    };
+    window.addEventListener('resize', pxOnResize, { passive: true });
+    pxEvaluate();
+    // re-measure once web fonts settle (they can change the content height)
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(pxEvaluate);
+  }
 
   // ─── SMOOTH SCROLL FOR ANCHOR LINKS ──────────────────────────
   document.querySelectorAll('a[href^="#"]').forEach(a => {
