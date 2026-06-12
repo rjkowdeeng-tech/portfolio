@@ -13,7 +13,7 @@
   <title>Ross John Dela Rosa — Junior Developer &amp; AI-Assisted Builder</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <style>
 /* ===========================
    InDigital Portfolio
@@ -33,6 +33,7 @@
   --border: rgba(240,237,230,0.1);
   --border-hover: rgba(240,237,230,0.3);
   --serif: 'Instrument Serif', Georgia, serif;
+  --display: 'Outfit', sans-serif;
   --sans: 'Space Grotesk', sans-serif;
   --mono: 'Space Mono', monospace;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -615,6 +616,7 @@ input, textarea { cursor: text; }
   font-style: italic;
   font-size: clamp(32px, 4vw, 56px);
   line-height: 1;
+  margin-left: 50px;
 }
 .about-stat-label {
   font-family: var(--mono);
@@ -622,6 +624,7 @@ input, textarea { cursor: text; }
   letter-spacing: 0.18em;
   color: var(--fg-muted);
   text-transform: uppercase;
+  margin-left: 50px;
 }
 
 /* --- EXPERTISE --- */
@@ -1290,6 +1293,20 @@ footer {
   .about-stats { grid-template-columns: 1fr 1fr; }
 }
 
+/* --- HEADER FONT (Outfit SemiBold) --- */
+.hero-name, .hero-bg-text,
+.about-headline, .about-person-title,
+.expertise-title, .expertise-name,
+.about-stat-num, .stat-num,
+.project-title, .projects-header-title,
+.contact-headline, .contact-send-title, .contact-form-title,
+.contact-closing-words, .footer-headline,
+.preloader-name, .mobile-nav a {
+  font-family: var(--display);
+  font-weight: 600;
+  font-style: normal;
+}
+
 /* --- TYPOGRAPHY REFINEMENTS --- */
 .expertise-title, .about-person-title, .contact-form-title { text-wrap: balance; }
 .hero-desc, .about-person p, .expertise-desc, .project-desc, .contact-sub { text-wrap: pretty; }
@@ -1331,7 +1348,7 @@ footer {
 <!-- PRELOADER -->
 <div id="preloader">
   <div class="preloader-name">
-    <span>InDigital.</span>
+    <span>.laaaunching.</span>
   </div>
   <div class="preloader-bar"><div class="preloader-bar-inner"></div></div>
   <div class="preloader-pct">0%</div>
@@ -1353,7 +1370,7 @@ footer {
 <!-- SIDE NAVIGATION -->
 <nav id="sidenav">
   <!-- Logo / Name -->
-  <div class="nav-logo"><a href="#hero">INDIGITAL</a></div>
+  <div class="nav-logo"><a href="#hero">IN.DI.GIT.AL.</a></div>
 
   <!-- Main Links -->
   <div class="nav-links">
@@ -1388,11 +1405,11 @@ footer {
        01 HERO
   ═══════════════════════════════════════ -->
   <section id="hero">
-    <div class="hero-bg-text">InDigital.</div>
+    <div class="hero-bg-text">IN.DI.GIT.AL.</div>
 
     <div class="hero-greeting" style="opacity: 1; transform: none; transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);">✦ ✦ ✦ Ross John Dela Rosa ✦ ✦ ✦</div>
 
-    <h1 class="hero-name" style="opacity: 1; transform: none; transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);">InDigital<span class="dot">.</span></h1>
+    <h1 class="hero-name" style="opacity: 1; transform: none; transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);">IN<span class="dot">.</span>DI<span class="dot">.</span>GIT<span class="dot">.</span>AL<span class="dot">.</span></h1>
 
     <div class="hero-title">
       Junior Developer<br />
@@ -1426,15 +1443,6 @@ footer {
       and create digital solutions — shipping as I go, and treating every project as a chance
       to <em>get sharper.</em>
     </p>
-
-    <div class="hero-tags reveal reveal-delay-1">
-      <span class="hero-tag">AI-Assisted</span>
-      <span class="hero-tag">Web Dev</span>
-      <span class="hero-tag">Automation</span>
-      <span class="hero-tag">Vibe Coding</span>
-      <span class="hero-tag">Workflows</span>
-      <span class="hero-tag">Always Learning</span>
-    </div>
 
     <div class="hero-ctas reveal reveal-delay-2">
       <a href="#projects" class="btn-primary">View Work →</a>
@@ -1472,29 +1480,6 @@ footer {
         Real Things <span class="star">★</span>
       </h2>
 
-      <!-- Marquee -->
-      <div class="about-marquee-wrap" aria-hidden="true">
-        <div class="about-marquee">
-          <span>JUNIOR DEVELOPER</span>
-          <span>·</span>
-          <span>AI-ASSISTED BUILDER</span>
-          <span>·</span>
-          <span>VIBE CODER</span>
-          <span>·</span>
-          <span>AUTOMATION ENTHUSIAST</span>
-          <span>·</span>
-          <span>JUNIOR DEVELOPER</span>
-          <span>·</span>
-          <span>AI-ASSISTED BUILDER</span>
-          <span>·</span>
-          <span>VIBE CODER</span>
-          <span>·</span>
-          <span>AUTOMATION ENTHUSIAST</span>
-          <span>·</span>
-        </div>
-      </div>
-    </div>
-
     <!-- Body grid -->
     <div class="about-body">
       <!-- The Person -->
@@ -1504,14 +1489,16 @@ footer {
           Early days.<br /><em>High standards.</em>
         </h3>
         <p class="reveal">
-          I'm a junior developer from the Philippines who builds with AI as a creative partner.
-          I learn fast by building real things — websites, automations, small tools — and every
-          project teaches me something a tutorial never could.
+          I'm a junior developer from the Philippines using AI as a creative partner to build real things.
+          From websites to automations and small business tools, every project is an opportunity to learn through practice rather than theory.
         </p>
         <p class="reveal reveal-delay-1">
-          I won't claim a decade of experience. What I bring is curiosity, consistency, and a
-          workflow built around modern AI tools that lets me punch above my weight — and I get
-          better every week, one build at a time.
+          Experience comes with time. 
+          Growth comes from showing up every day. I bring curiosity, discipline, and a willingness to figure things out. 
+          Combined with modern AI tools, that allows me to learn faster, build faster, and improve with every project I take on.
+        </p>
+        <p class="reveal reveal-delay-1">
+          The experience is growing. The standards are already high.
         </p>
         <a href="#contact" class="about-cta reveal reveal-delay-2">Let's talk →</a>
       </div>
@@ -1625,7 +1612,7 @@ footer {
       <div class="projects-header-left">
         <p class="projects-count">Personal Builds &nbsp;·&nbsp; 2026 —</p>
         <div class="projects-header-title reveal">
-          Work<br />in<br /><em style="font-family:var(--serif);font-style:italic;color:var(--fg-dim)">Progress.</em>
+          Work<br />in <em style="font-family:var(--serif);font-style:italic;color:var(--fg-dim)">Progress.</em>
         </div>
       </div>
       <div class="projects-header-right">
@@ -1806,9 +1793,6 @@ footer {
           <div class="contact-clock" id="clock">00:00:00</div>
           <div class="contact-tz">UTC+8 · Philippines</div>
         </div>
-        <div class="contact-send-title reveal">
-          Relay<br />the <em>Message.</em>
-        </div>
       </div>
 
       <!-- Right: form -->
@@ -1831,7 +1815,7 @@ footer {
         </div>
 
         <button class="form-submit" id="form-submit">Send Message&nbsp;&rarr;</button>
-        <p class="contact-no-spam">No spam, ever. Just good work.</p>
+        <p class="contact-no-spam">An update is on the way.</p>
       </div>
     </div><!-- /contact-body -->
 
@@ -1850,30 +1834,8 @@ footer {
        FOOTER
   ═══════════════════════════════════════ -->
   <footer>
-    <a href="mailto:rjkowdeeng@gmail.com" class="footer-email">rjkowdeeng@gmail.com</a>
-
-    <div class="footer-grid">
-      <div class="footer-col">
-        <p class="footer-col-title">Navigation</p>
-        <ul>
-          <li><a href="#hero">Index</a></li>
-          <li><a href="#projects">Work</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <p class="footer-col-title">Social</p>
-        <ul>
-          <li><a href="https://www.linkedin.com/in/rjohn2026" target="_blank">LinkedIn ↗</a></li>
-          <li><a href="https://twitter.com/rjkowdeeng" target="_blank">Twitter ↗</a></li>
-          <li><a href="https://github.com/rjkowdeeng-tech/portfolio" target="_blank">Github ↗</a></li>
-        </ul>
-      </div>
-    </div>
-
     <div class="footer-bottom">
-      <span class="footer-copy">© 2026 InDigital</span>
+      <span class="footer-copy">© 2026 IN.DI.GIT.AL.</span>
       <span class="footer-credit">CODE &amp; DESIGN BY Ross John Dela Rosa</span>
       <span class="footer-time" id="footer-time">PH — 00:00 LOCAL TIME</span>
     </div>
