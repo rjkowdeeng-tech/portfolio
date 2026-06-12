@@ -1,0 +1,50 @@
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+@keyframes about-divider-flow {
+  0%   { background-position: 0 -45%, 0 0; }
+  100% { background-position: 0 145%, 0 0; }
+}
+
+@keyframes about-dot-pulse {
+  0%, 100% { transform: translateX(-50%) scale(1);    background: var(--fg-dim); }
+  50%      { transform: translateX(-50%) scale(1.35); background: var(--fg); }
+}
+
+@keyframes ai-shine {
+  to { background-position: -200% center; }
+}
+
+@keyframes focus-orbit {
+  0%    { translate: 10px 0;    }
+  12.5% { translate: 7px 7px;   }
+  25%   { translate: 0 10px;    }
+  37.5% { translate: -7px 7px;  }
+  50%   { translate: -10px 0;   }
+  62.5% { translate: -7px -7px; }
+  75%   { translate: 0 -10px;   }
+  87.5% { translate: 7px -7px;  }
+  100%  { translate: 10px 0;    }
+}
+
+@keyframes focus-pulse {
+  0%   { opacity: 0.5; scale: 1;    }
+  100% { opacity: 0;   scale: 1.14; }
+}
+
+@keyframes timeline-ripple {
+  0%   { transform: scale(0.3); opacity: 0; }
+  12%  { opacity: 0.55; }
+  100% { transform: scale(7);   opacity: 0; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes load-bar { from { width: 0; } to { width: 100%; } }
