@@ -461,20 +461,53 @@ input, textarea { cursor: text; }
 #about { padding: 0; }
 
 .about-top {
-  padding: 100px 80px 80px;
-  border-bottom: 1px solid var(--border);
+  padding: 80px;
+  border-right: 1px solid var(--border);
 }
+/* flush the statement toward the center divider (ragged left edge) */
+.about-top .section-label { justify-content: flex-end; }
 
 .about-headline {
   font-family: var(--serif);
-  font-size: clamp(52px, 7vw, 100px);
+  font-size: clamp(36px, 4.6vw, 64px);
   line-height: 0.95;
   letter-spacing: -0.02em;
-  margin-bottom: 40px;
+  margin-bottom: 0;
   max-width: 900px;
+  text-align: right;
 }
 .about-headline em { font-style: italic; color: var(--fg-dim); }
 .about-headline .star { color: var(--fg-muted); font-size: 0.5em; vertical-align: middle; }
+
+/* "AI" — oversized, shiny chrome shimmer */
+.about-headline .ai {
+  display: inline-block;
+  font-size: 1.9em;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 0.85;
+  letter-spacing: 0.01em;
+  background-image: linear-gradient(
+    110deg,
+    #7c776e 0%,
+    #ffffff 22%,
+    #fffdf7 38%,
+    #ffffff 50%,
+    #c8c2b5 64%,
+    #ffffff 78%,
+    #7c776e 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 0 22px rgba(240, 237, 230, 0.5));
+  animation: ai-shine 3.2s linear infinite;
+}
+@keyframes ai-shine {
+  to { background-position: -200% center; }
+}
 
 .about-marquee-wrap {
   overflow: hidden;
@@ -499,14 +532,35 @@ input, textarea { cursor: text; }
 
 .about-body {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 0.9fr 1.1fr;
   border-bottom: 1px solid var(--border);
 }
 
 .about-person {
   padding: 80px;
-  border-right: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
 }
+
+/* Profile portrait — transparent cutout with a baked slate-gray vignette,
+   feathered into a soft oval so the edges blend into the page (no hard frame) */
+.about-portrait {
+  width: 100%;
+  line-height: 0;
+}
+.about-portrait img {
+  width: 100%;
+  height: auto;
+  filter: contrast(1.03) brightness(0.98);
+  transition: filter 0.6s var(--ease-out-expo);
+}
+.about-portrait:hover img {
+  filter: contrast(1.03) brightness(1.1);
+}
+.about-person-content { min-width: 0; }
+
 .about-person-label {
   font-family: var(--mono);
   font-size: 9px;
@@ -543,61 +597,6 @@ input, textarea { cursor: text; }
 }
 .about-cta:hover { border-color: var(--fg); }
 
-.about-synergy {
-  padding: 80px;
-  position: relative;
-  overflow: hidden;
-}
-.about-synergy-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  color: var(--fg-muted);
-  text-transform: uppercase;
-  margin-bottom: 40px;
-}
-
-.synergy-roles {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin-bottom: 60px;
-}
-.synergy-role {
-  font-family: var(--sans);
-  font-size: clamp(20px, 2.5vw, 32px);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--border);
-  position: relative;
-  overflow: hidden;
-  cursor: default;
-  transition: color 0.25s ease, padding-left 0.35s var(--ease-out-expo);
-}
-.synergy-role:first-child { border-top: 1px solid var(--border); }
-.synergy-role span { display: block; font-size: 0.45em; font-weight: 400; color: var(--fg-muted); letter-spacing: 0.1em; font-family: var(--mono); margin-top: 4px; }
-.synergy-role:hover { color: var(--fg-dim); padding-left: 16px; }
-
-.about-images-strip {
-  display: flex;
-  gap: 2px;
-  margin-top: 40px;
-  height: 220px;
-  overflow: hidden;
-}
-.about-img-thumb {
-  flex: 1;
-  overflow: hidden;
-  filter: grayscale(1) brightness(0.4);
-  transition: flex 0.5s var(--ease-out-expo), filter 0.4s ease;
-}
-.about-img-thumb:hover {
-  flex: 3;
-  filter: grayscale(0.3) brightness(0.7);
-}
-.about-img-thumb img { width: 100%; height: 100%; object-fit: cover; }
-
 .about-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -608,6 +607,9 @@ input, textarea { cursor: text; }
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: center;
   gap: 8px;
 }
 .about-stat:last-child { border-right: none; }
@@ -616,7 +618,6 @@ input, textarea { cursor: text; }
   font-style: italic;
   font-size: clamp(32px, 4vw, 56px);
   line-height: 1;
-  margin-left: 50px;
 }
 .about-stat-label {
   font-family: var(--mono);
@@ -624,7 +625,6 @@ input, textarea { cursor: text; }
   letter-spacing: 0.18em;
   color: var(--fg-muted);
   text-transform: uppercase;
-  margin-left: 50px;
 }
 
 /* --- EXPERTISE --- */
@@ -1204,7 +1204,7 @@ footer {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
   .about-body { grid-template-columns: 1fr; }
-  .about-person { border-right: none; border-bottom: 1px solid var(--border); }
+  .about-top { border-right: none; border-bottom: 1px solid var(--border); }
   .about-stats { grid-template-columns: 1fr 1fr; }
   .about-stat:nth-child(2) { border-right: none; }
   .about-stat:nth-child(3) { border-top: 1px solid var(--border); }
@@ -1244,7 +1244,6 @@ footer {
   .section { padding: 80px 40px; }
   .about-top { padding: 60px 40px; }
   .about-person { padding: 60px 40px; }
-  .about-synergy { padding: 60px 40px; }
   .expertise-header { padding: 60px 40px; }
   .expertise-item { padding: 40px; }
   .projects-header-left { padding: 60px 40px; }
@@ -1262,6 +1261,8 @@ footer {
 @media (max-width: 768px) {
   .hero-stats { gap: 32px; flex-wrap: wrap; }
   .about-body { grid-template-columns: 1fr; }
+  .about-person { grid-template-columns: 1fr; gap: 32px; }
+  .about-portrait { max-width: 220px; }
   .about-stats { grid-template-columns: 1fr 1fr; }
   .expertise-grid { grid-template-columns: 1fr; }
   .expertise-item { border-right: none !important; }
@@ -1280,7 +1281,9 @@ footer {
   .ticker-wrap { margin-left: -24px; }
   .section { padding: 60px 24px; }
   .about-top { padding: 48px 24px; }
-  .about-person, .about-synergy { padding: 48px 24px; }
+  .about-person { padding: 48px 24px; }
+  .about-person { grid-template-columns: 1fr; gap: 28px; }
+  .about-portrait { max-width: 200px; }
   .expertise-header { padding: 48px 24px; }
   .expertise-item { padding: 32px 24px; }
   .projects-header-left, .projects-header-right { padding: 48px 24px; }
@@ -1471,19 +1474,27 @@ footer {
   ═══════════════════════════════════════ -->
   <div id="about">
 
-    <!-- Top — big headline -->
-    <div class="about-top">
-      <p class="section-label">The Journey</p>
-      <h2 class="about-headline reveal">
-        I Learn<br />
-        <em>by</em> Building<br />
-        Real Things <span class="star">★</span>
-      </h2>
-
-    <!-- Body grid -->
+    <!-- The Journey + The Person — combined into one section, two columns -->
     <div class="about-body">
-      <!-- The Person -->
+
+      <!-- Left: the statement -->
+      <div class="about-top">
+        <p class="section-label">The Journey</p>
+        <h2 class="about-headline reveal">
+          I Learn<br />
+          <em>by</em> Building<br />
+          Real Things <span class="star">★</span><br />
+          Fast<em>with</em><br />
+          <span class="ai">AI</span>
+        </h2>
+      </div>
+
+      <!-- Right: the person -->
       <div class="about-person">
+        <div class="about-portrait reveal">
+          <img src="static/me.png" alt="Ross John Dela Rosa" loading="lazy" />
+        </div>
+        <div class="about-person-content">
         <p class="about-person-label">The Person</p>
         <h3 class="about-person-title reveal">
           Early days.<br /><em>High standards.</em>
@@ -1501,42 +1512,6 @@ footer {
           The experience is growing. The standards are already high.
         </p>
         <a href="#contact" class="about-cta reveal reveal-delay-2">Let's talk →</a>
-      </div>
-
-      <!-- The Synergy -->
-      <div class="about-synergy">
-        <p class="about-synergy-label">The Focus</p>
-        <div class="synergy-roles">
-          <div class="synergy-role">
-            BUILD
-            <span>WEBSITES &amp; DIGITAL TOOLS</span>
-          </div>
-          <div class="synergy-role">
-            AUTOMATE
-            <span>WORKFLOWS &amp; SYSTEMS</span>
-          </div>
-        </div>
-
-        <!-- Image strip -->
-        <div class="about-images-strip">
-          <div class="about-img-thumb">
-            <img src="https://images.unsplash.com/photo-1508921912186-1d1a45ebb3c1?auto=format&fit=crop&w=400&q=70" alt="" loading="lazy" />
-          </div>
-          <div class="about-img-thumb">
-            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=70" alt="" loading="lazy" />
-          </div>
-          <div class="about-img-thumb">
-            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=400&q=70" alt="" loading="lazy" />
-          </div>
-          <div class="about-img-thumb">
-            <img src="https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=400&q=70" alt="" loading="lazy" />
-          </div>
-          <div class="about-img-thumb">
-            <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=400&q=70" alt="" loading="lazy" />
-          </div>
-          <div class="about-img-thumb">
-            <img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=400&q=70" alt="" loading="lazy" />
-          </div>
         </div>
       </div>
     </div>
