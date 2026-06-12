@@ -681,10 +681,10 @@ input, textarea { cursor: text; }
   transform: translate(-50%, -50%) translate(var(--ox, 0px), var(--oy, 0px));
   z-index: 1;
 }
-.focus-slot--n { --ox: 0px;    --oy: -184px; }
-.focus-slot--e { --ox: 190px;  --oy: 0px;    }
-.focus-slot--s { --ox: 0px;    --oy: 184px;  }
-.focus-slot--w { --ox: -190px; --oy: 0px;    }
+.focus-slot--n { --ox: 0px;    --oy: -200px; }
+.focus-slot--e { --ox: 250px;  --oy: 0px;    }
+.focus-slot--s { --ox: 0px;    --oy: 200px;  }
+.focus-slot--w { --ox: -250px; --oy: 0px;    }
 
 /* ---- the floating glass card ---- */
 .focus-card {
@@ -692,11 +692,11 @@ input, textarea { cursor: text; }
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 25px;
   padding: 26px 26px 28px;
-  text-align: left;
+  text-align: center;
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 0px;
   background: linear-gradient(158deg, rgba(240,237,230,0.07), rgba(240,237,230,0.015));
   backdrop-filter: blur(14px) saturate(125%);
   -webkit-backdrop-filter: blur(14px) saturate(125%);
@@ -1702,8 +1702,8 @@ footer {
         <div class="focus-slot focus-slot--w">
           <button class="focus-card" type="button" aria-expanded="false">
             <span class="focus-card-num">04</span>
-            <span class="focus-card-title">Digital Operations</span>
-            <span class="focus-card-desc">Keeping the digital side of a business running — systems, content, and processes organized so the day just works.</span>
+            <span class="focus-card-title">Websites</span>
+            <span class="focus-card-desc">Responsive, intentional sites built with HTML, CSS, and JavaScript — AI-assisted from first prompt to final polish.</span>
           </button>
         </div>
 
