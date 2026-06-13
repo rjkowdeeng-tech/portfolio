@@ -38,6 +38,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;  /* no gray flash on tap (touch) */
 }
 
 a { color: inherit; text-decoration: none; }
@@ -224,8 +225,12 @@ input, textarea { cursor: text; }
   top: 20px; right: 24px;
   z-index: 200;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 5px;
   padding: 8px;
+  min-width: 44px;        /* comfortable touch target */
+  min-height: 44px;
 }
 #menu-btn span {
   display: block;
@@ -242,7 +247,7 @@ input, textarea { cursor: text; }
 
 /* --- MAIN CONTENT --- */
 #main {
-  margin-left: 220px;
+  margin-left: 253px;   /* clear the full 253px sidenav (it's opaque, z-index:100) */
   min-height: 100vh;
 }
 
@@ -425,7 +430,7 @@ input, textarea { cursor: text; }
    scrolls away with the page and its loop pauses once the hero leaves view, so
    it stays effectively home-only. Entirely independent of #neural-bg. */
 .orb-wrap {
-  --orb: clamp(420px, 46vw, 720px);   /* diameter of the (mostly off-screen) sphere */
+  --orb: clamp(840px, 92vw, 1440px);  /* diameter of the (mostly off-screen) sphere */
   --orb-opacity: 0.9;
   position: absolute;
   top: calc(var(--orb) * -0.46);      /* sphere centre just past the top-right corner */
@@ -447,7 +452,7 @@ input, textarea { cursor: text; }
   will-change: transform;             /* parallax translate runs on its own layer */
 }
 @media (max-width: 768px) {
-  .orb-wrap { --orb: clamp(260px, 80vw, 440px); --orb-opacity: 0.62; }
+  .orb-wrap { --orb: clamp(520px, 160vw, 880px); --orb-opacity: 0.62; }
 }
 
 /* --- SECTION WRAPPER --- */

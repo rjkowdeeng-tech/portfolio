@@ -11,6 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const cursor = document.getElementById('cursor');
   const cursorRing = document.getElementById('cursor-ring');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The custom cursor is a fine-pointer affordance only. On touch devices the
+  // elements are display:none, so running the rAF loop + per-scroll rect cache
+  // is pure battery/jank cost — skip the whole system there.
+  const cursorFinePointer = window.matchMedia('(pointer: fine)').matches;
+  if (cursor && cursorRing && cursorFinePointer) {
 
   let mx = 0, my = 0, rx = 0, ry = 0;       // pointer + lagged ring position
   let lastMx = 0, lastMy = 0, vx = 0, vy = 0; // smoothed pointer velocity
@@ -103,22 +108,28 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   animCursor();
 
+  }  // end fine-pointer custom-cursor system
+
 
   // ─── MOBILE MENU ─────────────────────────────────────────────
   const menuBtn = document.getElementById('menu-btn');
   const mobileNav = document.getElementById('mobile-nav');
   if (menuBtn && mobileNav) {
-    menuBtn.addEventListener('click', () => {
-      const open = menuBtn.classList.toggle('open');
+    const setMenu = (open) => {
+      menuBtn.classList.toggle('open', open);
       mobileNav.classList.toggle('open', open);
-      menuBtn.setAttribute('aria-expanded', open);
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      // lock the page behind the full-screen overlay so it doesn't scroll away
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+    menuBtn.addEventListener('click', () => setMenu(!menuBtn.classList.contains('open')));
+    mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuBtn.classList.contains('open')) setMenu(false);
     });
-    mobileNav.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        menuBtn.classList.remove('open');
-        mobileNav.classList.remove('open');
-        menuBtn.setAttribute('aria-expanded', 'false');
-      });
+    // returning to desktop width hides the overlay via CSS — clear the lock too
+    window.addEventListener('resize', () => {
+      if (menuBtn.classList.contains('open') && !window.matchMedia('(max-width: 1024px)').matches) setMenu(false);
     });
   }
 
@@ -200,11 +211,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── HERO PARALLAX BG TEXT ──────────────────────────────────
   const heroBgText = document.querySelector('.hero-bg-text');
-  if (heroBgText) {
+  if (heroBgText && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const heroSec = document.getElementById('hero');
+    let heroParallaxTicking = false;
+    const updateHeroParallax = () => {
+      heroParallaxTicking = false;
+      // once the hero has scrolled past, stop writing — nothing to parallax
+      if (heroSec && heroSec.getBoundingClientRect().bottom <= 0) return;
+      heroBgText.style.transform = `translateY(calc(-50% + ${window.scrollY * 0.2}px))`;
+    };
     window.addEventListener('scroll', () => {
-      const scrolled = window.scrollY;
-      heroBgText.style.transform = `translateY(calc(-50% + ${scrolled * 0.2}px))`;
-    });
+      if (!heroParallaxTicking) { heroParallaxTicking = true; requestAnimationFrame(updateHeroParallax); }
+    }, { passive: true });
   }
 
 
@@ -243,7 +261,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Desktop/tablet only (the CSS rules live in @media (min-width:769px)).
   const projList = document.querySelector('.project-list');
   const reduceMotionStack = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (projList && projectItems.length > 1 && !reduceMotionStack) {
+  // the paper-stack CSS only exists at ≥769px; below that the scroll math is
+  // wasted work on phones (cards fall back to normal flow), so don't run it.
+  const stackViewport = window.matchMedia('(min-width: 769px)').matches;
+  if (projList && projectItems.length > 1 && !reduceMotionStack && stackViewport) {
     const STACK_TOP = 86;   // px from viewport top where cards pin
     const SLIVER = 16;      // each card pins a little lower, so edges peek through
     const cards = Array.from(projectItems);
