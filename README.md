@@ -8,7 +8,7 @@ The portfolio site of **Ross John Dela Rosa** — a junior developer and AI-assi
 
 ## Overview
 
-This is a hand-built, static single-page site. Everything is plain **HTML, CSS, and JavaScript** — no build step, no bundler, no dependencies. The site doubles as its own case study: it's both the portfolio and the first project listed in it.
+This is a hand-built single-page site. The front-end is plain **HTML, CSS, and JavaScript** — no build step, no bundler, no framework. The only backend is a single **Vercel serverless function** (`api/contact.js`) that powers the contact form. The site doubles as its own case study: it's both the portfolio and the first project listed in it.
 
 The page is organized into five sections:
 
@@ -36,7 +36,8 @@ The page is organized into five sections:
 - **CSS3** — split across `main.css`, `components.css`, and `animations.css`
 - **Vanilla JavaScript** — no frameworks
 - **Google Fonts** — Instrument Serif, Outfit, Space Grotesk, Space Mono
-- **Vercel** — hosting & deployment
+- **Vercel** — static hosting + serverless function for the contact form
+- **Resend** — transactional email API for contact-form delivery
 
 ## Project Structure
 
@@ -56,24 +57,54 @@ website 2/
 ├── static/
 │   ├── me.png              # Portrait
 │   └── me-original.png
+├── api/
+│   └── contact.js          # Serverless function: POST /api/contact (sends email via Resend)
 ├── docs/                   # Design & system reference notes
+├── test-email.js           # Local diagnostic for the Resend mailer
+├── vercel.json             # Vercel function config
 └── README.md
 ```
 
+## Contact form / email
+
+The contact form POSTs to `/api/contact`, a Vercel serverless function (`api/contact.js`)
+that sends the message via the [Resend](https://resend.com) HTTPS API. SMTP isn't used —
+Vercel (like many hosts) blocks outbound SMTP, so email goes over HTTPS instead.
+
+Set these environment variables in **Vercel → project → Settings → Environment Variables**:
+
+| Var | Required | Notes |
+|-----|----------|-------|
+| `RESEND_API_KEY` | yes | From <https://resend.com/api-keys> (starts `re_…`) |
+| `CONTACT_TO` | yes | Where messages land. On Resend's free tier (no verified domain) this **must** be the email you signed up to Resend with. |
+| `MAIL_FROM` | no | From address. Defaults to `IN.DI.GIT.AL. <onboarding@resend.dev>`. Set to your own once you verify a domain in Resend. |
+
+Spam guard: a hidden honeypot field silently drops bots. (No per-IP rate limiter — an
+in-memory one wouldn't persist across serverless invocations; add Upstash/Vercel KV if needed.)
+
 ## Running Locally
 
-No build step required — it's a static site. Clone and open it, or serve the folder for correct asset paths:
+The front-end is static, so for **layout/visual work** any static server is enough:
 
 ```bash
-# Option 1: open directly
-# just open index.html in a browser
-
-# Option 2: serve locally (recommended)
-python -m http.server 8000
-# then visit http://localhost:8000
+python -m http.server 8000   # then visit http://localhost:8000
+# or: npx serve  /  the VS Code Live Server extension
 ```
 
-Any static server works (e.g. `npx serve`, the VS Code Live Server extension, etc.).
+To also run the **contact-form function** locally, use the Vercel CLI (it serves the
+static files *and* `api/contact.js` together, with env vars pulled from the project):
+
+```bash
+npm i -g vercel
+vercel env pull        # fetches RESEND_API_KEY, CONTACT_TO, MAIL_FROM into .env.local
+npm run dev            # = vercel dev
+```
+
+You can also test the Resend path on its own with a local `.env` (see `.env.example`):
+
+```bash
+npm run test:email     # = node test-email.js
+```
 
 ## Deployment
 

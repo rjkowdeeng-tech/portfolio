@@ -3,16 +3,14 @@
   "version": "1.0.0",
   "description": "Ross John Dela Rosa — portfolio site + contact-form email backend.",
   "type": "commonjs",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "dev": "vercel dev",
+    "test:email": "node test-email.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": "22.x"
   },
-  "dependencies": {
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.4.0"
+  "devDependencies": {
+    "dotenv": "^16.4.5"
   }
 }
