@@ -384,8 +384,8 @@ input, textarea { cursor: text; }
 }
 .stat { display: flex; flex-direction: column; gap: 4px; }
 .stat-num {
-  font-family: var(--serif);
-  font-style: italic;
+  font-family: var(--display);
+  font-style: normal;
   font-size: 42px;
   line-height: 1;
   font-weight: 400;
@@ -396,21 +396,6 @@ input, textarea { cursor: text; }
   letter-spacing: 0.15em;
   color: var(--fg-muted);
   text-transform: uppercase;
-}
-
-/* Hero BG decor */
-.hero-bg-text {
-  position: absolute;
-  top: 25%;
-  right: 36%;
-  transform: translateY(-50%);
-  font-family: var(--serif);
-  font-size: clamp(120px, 16vw, 240px);
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(240,237,230,0.04);
-  pointer-events: none;
-  user-select: none;
-  line-height: 1;
 }
 
 /* --- NEURAL NETWORK BACKGROUND --- */
@@ -463,9 +448,9 @@ input, textarea { cursor: text; }
 
 .section-label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 0.2em;
-  color: var(--fg-muted);
+  color: var(--fg-dim);
   text-transform: uppercase;
   margin-bottom: 80px;
   display: flex;

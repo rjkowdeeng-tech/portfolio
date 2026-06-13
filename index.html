@@ -93,7 +93,7 @@
     <div class="nav-year">2026··Philippines</div>
     <div class="nav-tags">
       <span class="nav-tag">Build</span>
-      <span class="nav-tag">AI</span>
+      <span class="nav-tag">Automate</span>
       <span class="nav-tag">Learn</span>
     </div>
   </div>
@@ -106,7 +106,6 @@
        01 HERO
   ═══════════════════════════════════════ -->
   <section id="hero">
-    <div class="hero-bg-text">IN.DI.GIT.AL.</div>
 
     <div class="hero-greeting" style="opacity: 1; transform: none; transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);">✦ ✦ ✦ Ross John Dela Rosa ✦ ✦ ✦</div>
 
@@ -314,7 +313,12 @@
               workflow. Custom animations, editorial layout, no frameworks, no templates.
               It doubles as the case study.
             </p>
-            <a href="https://github.com/rjkowdeeng-tech/portfolio" target="_blank" class="project-cta">View Source ↗</a>
+            <div class="project-actions">
+              <a href="https://github.com/rjkowdeeng-tech/portfolio" target="_blank" class="project-cta">View Source ↗</a>
+              <button type="button" class="project-cta project-debrief-btn" data-debrief="this-site" aria-haspopup="dialog">
+                <span class="debrief-node" aria-hidden="true"></span>Case Study
+              </button>
+            </div>
           </div>
           <div class="project-img-side">
             <span class="project-idx">PROJECT 01 / 03</span>
@@ -349,7 +353,12 @@
               tooling. Built one experiment at a time — wins, failures, and what each
               one taught me.
             </p>
-            <a href="https://github.com/rjkowdeeng-tech/portfolio" target="_blank" class="project-cta">View on GitHub ↗</a>
+            <div class="project-actions">
+              <a href="https://github.com/rjkowdeeng-tech/portfolio" target="_blank" class="project-cta">View on GitHub ↗</a>
+              <button type="button" class="project-cta project-debrief-btn" data-debrief="automation-lab" aria-haspopup="dialog">
+                <span class="debrief-node" aria-hidden="true"></span>Case Study
+              </button>
+            </div>
           </div>
           <div class="project-img-side">
             <span class="project-idx">PROJECT 02 / 03</span>
@@ -383,7 +392,12 @@
               Clones, components, and small tools built to sharpen fundamentals.
               Every repo is a rep — proof of consistency over claims of experience.
             </p>
-            <a href="https://github.com/rjkowdeeng-tech/portfolio" target="_blank" class="project-cta">Browse on GitHub ↗</a>
+            <div class="project-actions">
+              <a href="https://github.com/rjkowdeeng-tech/portfolio" target="_blank" class="project-cta">View on GitHub ↗</a>
+              <button type="button" class="project-cta project-debrief-btn" data-debrief="practice-builds" aria-haspopup="dialog">
+                <span class="debrief-node" aria-hidden="true"></span>Case Study
+              </button>
+            </div>
           </div>
           <div class="project-img-side">
             <span class="project-idx">PROJECT 03 / 03</span>
@@ -546,23 +560,13 @@
         </p>
 
         <div class="contact-channels reveal reveal-delay-1">
-          <a href="mailto:rjkowdeeng@gmail.com" class="contact-channel">
-            <span class="channel-num">01</span>
-            <span class="channel-label">Email</span>
-            <span class="channel-value">rjkowdeeng@gmail.com ↗</span>
-          </a>
-          <a href="https://twitter.com/rjkowdeeng" target="_blank" class="contact-channel">
-            <span class="channel-num">02</span>
-            <span class="channel-label">Twitter</span>
-            <span class="channel-value">@rjkowdeeng ↗</span>
-          </a>
           <a href="https://www.linkedin.com/in/rjohn2026" target="_blank" class="contact-channel">
-            <span class="channel-num">03</span>
+            <span class="channel-num">01</span>
             <span class="channel-label">LinkedIn</span>
             <span class="channel-value">linkedin.com/in/rjohn2026 ↗</span>
           </a>
           <a href="https://github.com/rjkowdeeng-tech/portfolio" target="_blank" class="contact-channel">
-            <span class="channel-num">04</span>
+            <span class="channel-num">02</span>
             <span class="channel-label">GitHub</span>
             <span class="channel-value">github.com/rjkowdeeng-tech ↗</span>
           </a>
@@ -575,21 +579,26 @@
           Your<br /><em>Message.</em>
         </div>
 
-        <div class="form-group">
-          <input type="text" id="f-name" placeholder="Your Name" aria-label="Your name" autocomplete="name" />
-        </div>
-        <div class="form-group">
-          <input type="email" id="f-email" placeholder="Email Address" aria-label="Email address" autocomplete="email" />
-        </div>
-        <div class="form-group">
-          <input type="text" id="f-subject" placeholder="Subject" aria-label="Subject" />
-        </div>
-        <div class="form-group">
-          <textarea id="f-msg" placeholder="Your Message" aria-label="Your message"></textarea>
-        </div>
+        <form id="contact-form" novalidate>
+          <div class="form-group">
+            <input type="text" id="f-name" name="name" placeholder="Your Name" aria-label="Your name" autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <input type="email" id="f-email" name="email" placeholder="Email Address" aria-label="Email address" autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <input type="text" id="f-subject" name="subject" placeholder="Subject" aria-label="Subject" />
+          </div>
+          <div class="form-group">
+            <textarea id="f-msg" name="message" placeholder="Your Message" aria-label="Your message"></textarea>
+          </div>
 
-        <button class="form-submit" id="form-submit">Send Message&nbsp;&rarr;</button>
-        <p class="contact-no-spam">An update is on the way.</p>
+          <!-- honeypot: hidden from humans, bots tend to fill it -->
+          <input type="text" id="f-company" name="company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+          <button type="submit" class="form-submit" id="form-submit">Send Message&nbsp;&rarr;</button>
+          <p class="contact-no-spam"><span class="hl">An update is on the way.</span></p>
+        </form>
       </div>
     </div><!-- /contact-body -->
 
@@ -617,10 +626,63 @@
 
 </main><!-- /main -->
 
+<!-- ═══════════════════════════════════════
+     MISSION DEBRIEF · case-study modal
+═══════════════════════════════════════ -->
+<div id="debrief" class="debrief-overlay" aria-hidden="true">
+  <div class="debrief-backdrop" data-debrief-close></div>
+  <div class="debrief-panel" role="dialog" aria-modal="true" aria-labelledby="debrief-title" tabindex="-1">
+    <span class="debrief-scan" aria-hidden="true"></span>
+
+    <button type="button" class="debrief-close" data-debrief-close aria-label="Close mission debrief">
+      <span aria-hidden="true">ESC ✕</span>
+    </button>
+
+    <header class="debrief-head">
+      <div class="debrief-eyebrow">
+        <span class="debrief-status"><span class="debrief-pulse" aria-hidden="true"></span>Mission Debrief</span>
+        <span class="debrief-id" id="debrief-id">NODE</span>
+      </div>
+      <h2 class="debrief-title" id="debrief-title">Project</h2>
+      <p class="debrief-subtitle" id="debrief-subtitle">Project Analysis Node</p>
+      <div class="debrief-nodes" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </header>
+
+    <div class="debrief-body">
+      <section class="debrief-block">
+        <p class="debrief-label"><span class="debrief-label-idx">01</span> Problem</p>
+        <p class="debrief-text" id="debrief-problem"></p>
+      </section>
+
+      <div class="debrief-divider" aria-hidden="true"></div>
+
+      <section class="debrief-block">
+        <p class="debrief-label"><span class="debrief-label-idx">02</span> Approach</p>
+        <p class="debrief-text" id="debrief-approach"></p>
+      </section>
+
+      <div class="debrief-divider" aria-hidden="true"></div>
+
+      <section class="debrief-block">
+        <p class="debrief-label"><span class="debrief-label-idx">03</span> Tools Used</p>
+        <ul class="debrief-tools" id="debrief-tools"></ul>
+      </section>
+    </div>
+
+    <footer class="debrief-foot">
+      <span>END OF TRANSMISSION</span>
+      <span class="debrief-foot-sig">IN.DI.GIT.AL.</span>
+    </footer>
+  </div>
+</div>
+
 <script src="js/app.js"></script>
 <script src="js/interactions.js"></script>
 <script src="js/background-neurons.js"></script>
 <script src="js/neural-orb.js"></script>
 <script src="js/focus-neural.js"></script>
+<script src="js/case-study.js"></script>
 </body>
 </html>

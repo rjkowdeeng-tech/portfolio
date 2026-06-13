@@ -209,44 +209,52 @@ document.addEventListener('DOMContentLoaded', () => {
   // Already handled with CSS
 
 
-  // ─── HERO PARALLAX BG TEXT ──────────────────────────────────
-  const heroBgText = document.querySelector('.hero-bg-text');
-  if (heroBgText && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const heroSec = document.getElementById('hero');
-    let heroParallaxTicking = false;
-    const updateHeroParallax = () => {
-      heroParallaxTicking = false;
-      // once the hero has scrolled past, stop writing — nothing to parallax
-      if (heroSec && heroSec.getBoundingClientRect().bottom <= 0) return;
-      heroBgText.style.transform = `translateY(calc(-50% + ${window.scrollY * 0.2}px))`;
-    };
-    window.addEventListener('scroll', () => {
-      if (!heroParallaxTicking) { heroParallaxTicking = true; requestAnimationFrame(updateHeroParallax); }
-    }, { passive: true });
-  }
-
-
   // ─── FORM SUBMIT ─────────────────────────────────────────────
-  // No backend — compose a real email instead of faking a "Sent" state.
+  // POST to the backend (/api/contact), which emails the message via Gmail.
+  const contactForm = document.getElementById('contact-form');
   const formBtn = document.getElementById('form-submit');
-  if (formBtn) {
-    formBtn.addEventListener('click', (e) => {
+  if (contactForm && formBtn) {
+    const DEFAULT_LABEL = 'Send Message&nbsp;&rarr;';
+    const flash = (text, holdMs = 2200) => {
+      formBtn.textContent = text;
+      setTimeout(() => { formBtn.innerHTML = DEFAULT_LABEL; }, holdMs);
+    };
+
+    contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (formBtn.disabled) return;
+
       const name = document.getElementById('f-name').value.trim();
       const email = document.getElementById('f-email').value.trim();
       const subject = document.getElementById('f-subject').value.trim();
-      const msg = document.getElementById('f-msg').value.trim();
-      if (!name || !email || !msg) {
-        formBtn.textContent = 'Fill all fields →';
-        setTimeout(() => formBtn.innerHTML = 'Send Message&nbsp;&rarr;', 2000);
+      const message = document.getElementById('f-msg').value.trim();
+      const company = document.getElementById('f-company').value.trim(); // honeypot
+
+      if (!name || !email || !message) {
+        flash('Fill all fields →');
         return;
       }
-      const body = msg + '\n\n— ' + name + ' (' + email + ')';
-      window.location.href = 'mailto:rjkowdeeng@gmail.com'
-        + '?subject=' + encodeURIComponent(subject || 'Hello from your portfolio')
-        + '&body=' + encodeURIComponent(body);
-      formBtn.textContent = 'Opening your email app →';
-      setTimeout(() => formBtn.innerHTML = 'Send Message&nbsp;&rarr;', 3000);
+
+      formBtn.disabled = true;
+      formBtn.textContent = 'Sending…';
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, subject, message, company }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.ok) {
+          contactForm.reset();
+          flash('Message sent ✓', 3000);
+        } else {
+          flash((data && data.error) ? '⚠ ' + data.error : 'Something went wrong →', 3200);
+        }
+      } catch (_) {
+        flash('Network error — try again →', 3200);
+      } finally {
+        formBtn.disabled = false;
+      }
     });
   }
 
@@ -374,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // blocks are the exact page background, so the cover is invisible and content
     // simply materialises block by block as the wave clears them (no grid lines)
     const BG = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#080808';
-    const DISSOLVE_MS = 2000;    // one-time dissolve duration
+    const DISSOLVE_MS = 1500;    // one-time dissolve duration
     const pxCtx = pxCanvas.getContext('2d');
     let pxCells = [], pxMaxOrder = 0, pxActive = false, pxShineRaf = null;
     let pxTriggered = false, pxStart = 0;                   // one-shot, time-based dissolve
