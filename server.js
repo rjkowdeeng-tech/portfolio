@@ -35,8 +35,9 @@ const mailReady = Boolean(GMAIL_USER && GMAIL_APP_PASSWORD);
 const transporter = mailReady
   ? nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,                 // implicit TLS
+      port: 587,
+      secure: false,                // STARTTLS — Render blocks 465 (implicit TLS)
+      requireTLS: true,             // still upgrade to TLS before auth
       auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD },
       // Fail fast instead of hanging ~2 min on a stalled connection (the cause
       // of the form being stuck on "Sending…"). If the socket can't reach

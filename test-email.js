@@ -27,8 +27,9 @@ const GMAIL_APP_PASSWORD = (process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g
 
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false,
+    requireTLS: true,
     auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD },
     connectionTimeout: 10_000,
     greetingTimeout: 10_000,
@@ -53,7 +54,7 @@ const GMAIL_APP_PASSWORD = (process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g
   } catch (err) {
     console.error(`\n✖ FAILED [${err.code || 'ERR'}]: ${err.message}`);
     if (err.code === 'EAUTH')      console.error('   → Wrong app password, or 2-Step Verification / app passwords not enabled.');
-    if (err.code === 'ETIMEDOUT')  console.error('   → Connection timed out — host/firewall is blocking outbound SMTP (port 465).');
+    if (err.code === 'ETIMEDOUT')  console.error('   → Connection timed out — host/firewall is blocking outbound SMTP (port 587).');
     if (err.code === 'ECONNECTION')console.error('   → Could not open a connection to smtp.gmail.com.');
     process.exit(1);
   }
