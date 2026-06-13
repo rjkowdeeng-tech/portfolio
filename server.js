@@ -24,20 +24,39 @@ const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const { GMAIL_USER, GMAIL_APP_PASSWORD, CONTACT_TO } = process.env;
+const { GMAIL_USER, CONTACT_TO } = process.env;
+// Google displays app passwords as "abcd efgh ijkl mnop" — copied with spaces
+// they fail SMTP auth. Strip all whitespace so either form works.
+const GMAIL_APP_PASSWORD = (process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, '');
 
 // One reusable transport. If creds are missing we still boot (so the static
 // site works), but /api/contact will report it's not configured.
 const mailReady = Boolean(GMAIL_USER && GMAIL_APP_PASSWORD);
 const transporter = mailReady
   ? nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,                 // implicit TLS
       auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD },
+      // Fail fast instead of hanging ~2 min on a stalled connection (the cause
+      // of the form being stuck on "Sending…"). If the socket can't reach
+      // Gmail, we error in ~10s and tell the visitor to try again.
+      connectionTimeout: 10_000,    // ms to establish the TCP/TLS socket
+      greetingTimeout: 10_000,      // ms to wait for the SMTP greeting
+      socketTimeout: 20_000,        // ms of inactivity before aborting
+      pool: true,                   // reuse connections across submissions
+      maxConnections: 2,
     })
   : null;
 
 if (!mailReady) {
   console.warn('[contact] GMAIL_USER / GMAIL_APP_PASSWORD not set — /api/contact will return 503 until they are.');
+} else {
+  // Probe the SMTP connection at boot so the logs show immediately whether
+  // credentials + network are good, rather than only finding out on first send.
+  transporter.verify()
+    .then(() => console.log('[contact] SMTP ready — Gmail connection verified.'))
+    .catch((err) => console.error('[contact] SMTP verify FAILED:', err.message));
 }
 
 app.use(express.json({ limit: '16kb' }));
@@ -87,7 +106,9 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
 
     return res.json({ ok: true });
   } catch (err) {
-    console.error('[contact] send failed:', err.message);
+    // err.code is the useful part: EAUTH (bad app password), ETIMEDOUT /
+    // ECONNECTION (network/port blocked), EENVELOPE (bad address).
+    console.error(`[contact] send failed [${err.code || 'ERR'}]:`, err.message);
     return res.status(500).json({ ok: false, error: 'Could not send your message. Please try again.' });
   }
 });
